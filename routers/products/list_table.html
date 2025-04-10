@@ -1,0 +1,64 @@
+<div class="flex flex-row mt-5">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        {% if query_code == 0 %}
+        <p class="text-xs font-bold text-black-700">
+            {{query_result}}
+        </p>
+        {% else %}
+        <p class="text-xs font-bold text-red-700">
+            {{query_result}}
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        <table class="w-full">
+            <thead class="font-normal text-center text-xs leading-6 text-zinc-800">
+                <tr>
+                    <th class="p-4">name</th>
+                    <th class="p-4">categories</th>
+                    <th class="p-4">brands</th>
+                    <th class="p-4">color</th>
+                    <th class="p-4">season</th>
+                    <th class="p-4">model</th>
+                    <th class="p-4">id</th>
+                    <th class="p-4"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products_list %}
+                <tr class="group hover:bg-zinc-50 odd:bg-white even:bg-slate-50 text-center text-xs">
+                    <td class="p-4 font-normal">
+                        {% if product.source_url %}
+                        <a class="font-bold text-blue-700" href="{{ product.source_url }}" target="_blank">
+                            {{ product.name }}
+                        </a>
+                        {% else %}
+                        {{ product.name }}
+                        {% endif %}
+                    </td>
+                    <td class="p-4 font-normal">{{ product.categories_string }}</td>
+                    <td class="p-4 font-normal">{{ product.brands_string }}</td>
+                    <td class="p-4 font-normal">{{ product.color }}</td>
+                    <td class="p-4 font-normal">{{ product.season }}</td>
+                    <td class="p-4 font-normal">{{ product.model }}</td>
+                    <td class="p-4 font-normal">{{ product.id }}</td>
+                    <td class="p-2 mr-0 font-normal">
+                        <a href="/products/{{product.id}}/edit">
+                            <svg xmlns=" http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="size-4 text-sky-400">
+                                <path
+                                    d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
+                            </svg>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

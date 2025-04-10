@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col mx-auto mt-10">
+    <h3 class="mx-auto font-bold">
+        {{ app_name }}
+    </h3>
+    <div class="mt-2 mx-auto text-xs text-zinc-400">
+        @{{ app_version }}
+    </div>
+</div>
+
+<div class="flex flex-col mx-auto mt-20" id="">
+    <div class="text-bold text-lg text-center">
+        whoops ... something went wrong
+    </div>
+</div>
+
+{% endblock %}

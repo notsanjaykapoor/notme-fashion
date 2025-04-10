@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        {% block title %}Notme Paas{% endblock %}
+    </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/components.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                screens: {
+                    'xs': '320px',
+                    'sm': '640px',
+                    'md': '768px',
+                    'lg': '1024px',
+                    'xl': '1280px',
+                    '2xl': '1536px',
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="font-mono">
+    <header class="flex flex-wrap justify-start z-50 w-full text-sm pb-4 bg-blue-700">
+        <nav class="max-w-[85rem] w-full mx-auto px-4 flex justify-between" aria-label="Global">
+            <div class="flex flex-row items-center gap-5 mt-5 mt-0 sm:ps-5 sm:text-sm xs:text-xs">
+                <a class="font-medium text-white hover:text-gray-400" href="/gallery">Gallery</a>
+                {% if user %}
+                <a class="font-medium text-white hover:text-gray-400" href="/products">Products</a>
+                {% endif %}
+            </div>
+            <div class="flex flex-row items-center gap-5 mt-5 mt-0 ml-3 sm:ps-5 sm:text-sm xs:text-xs">
+                {% if user %}
+                <span class="font-medium text-white text-xs opacity-50">
+                    {{ user.email }}
+                </span>
+                <a class="font-medium text-white hover:text-gray-400 mx-5" href="/logout">Logout</a>
+                {% else %}
+                <a class="font-medium text-white hover:text-gray-400 mx-5" href="/login">Login</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.code-workspace
+.env*
+.venv*
+.vscode
+
+sqlite*
+
+data/
+env/
+logs/
+**/*secret*.yml
+secrets/
+test/data/

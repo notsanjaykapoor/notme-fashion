@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col mx-auto mt-10">
+    <h3 class="mx-auto font-bold">
+        {{ app_name }}
+    </h3>
+    <div class="mt-2 mx-auto text-xs text-zinc-400">
+        @{{ app_version }}
+    </div>
+</div>
+
+{% if user %}
+<div class="flex flex-row mx-auto mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-4/12 font-normal text-xs">
+        <input type="search" name="query" value="{{query}}" placeholder="search gallery" autocomplete="off"
+            hx-get="/gallery" hx-target="#masonry" hx-trigger="input changed delay:750ms, search"
+            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent font-sans outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+{% endif %}
+
+<div class="flex flex-col mx-auto mt-0 xs:w-full sm:w-full" id="masonry">
+    {% include "gallery/list_masonry.html" %}
+</div>
+
+<div class="flex flex-row mt-20 mb-20">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        <nav class="flex items-center justify-between gap-x-1" aria-label="Pagination">
+            <button type="button"
+                class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-1.5 text-xs rounded-lg font-bold text-blue-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
+                aria-label="Previous">
+                {% if page_offset > 0 %}
+                <a href="{{ page_prev }}" class="">
+                    <svg aria-hidden="true" class="hidden shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                    <span>previous</span>
+                </a>
+                {% endif %}
+            </button>
+
+            <button type="button"
+                class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-1.5 text-xs rounded-lg font-bold text-blue-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
+                aria-label="Next">
+                {% if page_offset + page_limit < total_count %} <a href="{{ page_next }}" class="">
+                    <span>next</span>
+                    <svg aria-hidden="true" class="hidden shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg"
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                    </a>
+                    {% endif %}
+            </button>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}

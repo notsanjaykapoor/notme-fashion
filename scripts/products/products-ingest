@@ -1,0 +1,151 @@
+#!/usr/bin/env python
+
+import csv
+import os
+import subprocess
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], "../.."))
+
+import dot_init
+
+import click
+import ulid
+
+import models
+import services.database
+import services.products
+import services.products.images
+import services.users
+
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+@click.option("--file-id", default="1rSHZMWA4AKoshCyMCo7gf7hxK_aonnESaGqWtUnwFmw", required=False, help="google file id")
+@click.option("--file-output", default="products.csv", required=False, help="output file name")
+@click.option("--user", "user_email", default="notsanjaykapoor@gmail.com", required=False, help="user email")
+def run(file_id: str, file_output: str, user_email: str):
+    """
+    
+    """
+    _print_status(f"file '{file_id}' download '{file_output}' try")
+
+    response = subprocess.run(
+        f"wget --output-document={file_output} https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
+        shell=True,
+        capture_output=False,
+    )
+
+    if response.returncode != 0:
+        _print_error(f"wget error {response}")
+        exit(response.returncode)
+
+    _print_ok(f"file download '{file_output}' completed")
+
+    with open(file_output) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if not row.get("name"):
+                continue
+
+            print(row)
+
+            product_name = row.get("name").strip().lower()
+            source_id = row.get("grailed_id").strip()
+
+            product_brands = [s.strip().lower() for s in row.get("brands").split(",") if s.strip()]
+            product_cats = [s.strip().lower() for s in row.get("category").split(",") if s.strip()]
+            product_tags = [s.strip().lower() for s in row.get("tags").split(",") if s.strip()]
+
+            if source_id:
+                source_name = models.product.SOURCE_GRAILED
+                product_state = models.product.STATE_SELL
+            else:
+                source_id = ulid.new().str
+                source_name = models.product.SOURCE_NOTME
+                product_state = models.product.STATE_DISPLAY
+
+            with services.database.session.get() as db_session:
+                user = services.users.get_by_email(db_session=db_session, email=user_email)
+
+                product = services.products.get_by_source(
+                    db_session=db_session,
+                    source_id=source_id,
+                    source_name=source_name,
+                )
+
+                if not product:
+                    product = services.products.get_by_name(
+                        db_session=db_session,
+                        name=product_name,
+                    )
+
+                product_data = {
+                    "color": row.get("color", "").strip().lower(),
+                    "model": row.get("model", "").strip().lower(),
+                    "season": row.get("season", "").strip().lower(),
+                }
+
+                if product:
+                    _print_status(f"product {product.id} exists")
+                else:
+                    product = services.products.create(
+                        db_session=db_session,
+                        key=ulid.new().str,
+                        name=product_name,
+                        source_id=source_id,
+                        source_name=source_name,
+                        user_id=user.id,
+                    )
+
+                    _print_ok(f"product {product.id} created")
+
+                # create product images
+                image_urls = [s.strip() for s in row.get("images").split(",") if s.strip()]
+
+                for image_url in image_urls:
+                    code, image = services.products.images.create(
+                        db_session=db_session,
+                        folder="/products",
+                        url=image_url,
+                        product=product,
+                    )
+
+                    if code == 409:
+                        _print_status(f"product {product.id} image {image.id} exists")
+                    else:
+                        _print_ok(f"product {product.id} image {image.id} created")
+
+                services.products.sync_meta(
+                    db_session=db_session,
+                    product=product,
+                    data=product_data,
+                    brands=product_brands,
+                    categories=product_cats,
+                    tags=product_tags,
+                )
+
+                if product.state != product_state:
+                    product.state = product_state
+                    db_session.add(product)
+                    db_session.commit()
+
+def _print_error(s: str):
+    print("\x1b[1;31m" + s + "\x1b[0m", flush=True)
+
+
+def _print_ok(s: str):
+    print("\x1b[1;32m" + s + "\x1b[0m", flush=True)
+
+
+def _print_status(s: str):
+    print("\x1b[1;36m" + s + "\x1b[0m", flush=True)
+
+
+cli.add_command(run)
+
+if __name__ == "__main__":
+    cli()

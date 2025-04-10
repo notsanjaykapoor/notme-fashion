@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+
+import glob
+import re
+import subprocess
+import time
+
+import click
+import ulid
+import yaml
+
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+@click.option("--dockerfile", default="Dockerfile", required=False, help="")
+@click.option("--sha", default="", required=False, help="git repo sha or tag")
+@click.option("--no-push", is_flag=True, show_default=True, default=True, help="")
+@click.option("--env", default="prd", required=False, help="app env, e.g. stg, prd")
+def build(dockerfile: str, sha: str, no_push: bool, env: str):
+    """
+    Build image using specified dockerfile and push to repo defined by cube file(s).
+    """
+    repos = set()
+    files = glob.glob("./deploy/*.yml")
+
+    for file in files:
+        with open(file, "r") as f:
+            data = yaml.safe_load(f)
+
+            containers = data.get("spec", {}).get("containers", [])
+            container = containers[0]
+            repos.add(container.get("image"))
+
+    if not repos:
+        raise ValueError("docker repo missing")
+
+    if len(repos) > 1:
+        raise ValueError("docker repo is not unique")
+
+    repo = list(repos)[0]
+
+    # strip off image tag if its present
+    repo = re.sub(r"(:.*)$", "", repo)
+
+    time_start_unix = time.time()
+
+    version = sha or f"{env}-{ulid.new()}"
+
+    print("docker build '{dockerfile}' version {version}", end=" ... ", flush=True)
+
+    _docker_build(dockerfile=dockerfile, version=version, repo=repo, push=no_push)
+
+    _print_ok("ok")
+
+    time_mins = round((time.time() - time_start_unix), 1)
+
+    _print_ok(f"build completed in {time_mins} secs")
+
+
+def _docker_build(dockerfile: str, version: str, repo: str, push: bool) -> int:
+    response = subprocess.run(
+        f"docker build -t {repo}:{version} -t {repo}:latest --platform linux/amd64 --build-arg APP_VERSION={version} -f {dockerfile} .",
+        shell=True,
+        capture_output=False,
+    )
+
+    if response.returncode != 0:
+        exit(response.returncode)
+
+    if not push:
+        # build but don't push image
+        return response.returncode
+
+    response = subprocess.run(
+        f"docker push {repo}:{version}",
+        shell=True,
+        capture_output=False,
+    )
+
+    if response.returncode != 0:
+        exit(response.returncode)
+
+    response = subprocess.run(
+        f"docker push {repo}:latest",
+        shell=True,
+        capture_output=False,
+    )
+
+    if response.returncode != 0:
+        exit(response.returncode)
+
+    return response.returncode
+
+
+def _print_error(s: str):
+    print("\x1b[1;31m" + s + "\x1b[0m", flush=True)
+
+
+def _print_ok(s: str):
+    print("\x1b[1;32m" + s + "\x1b[0m", flush=True)
+
+
+def _print_status(s: str):
+    print("\x1b[1;36m" + s + "\x1b[0m", flush=True)
+
+
+cli.add_command(build)
+
+if __name__ == "__main__":
+    cli()

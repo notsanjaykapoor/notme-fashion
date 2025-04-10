@@ -1,0 +1,46 @@
+[project]
+name = "notme-fashion"
+version = "0.1.0"
+description = "fashion, images, galleries"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.13.2",
+    "click>=8.1.7",
+    "coloredlogs>=15.0.1",
+    "fastapi>=0.113.0",
+    "google-auth-oauthlib>=1.2.1",
+    "google-cloud-storage>=3.1.0",
+    "hcloud>=2.2.1",
+    "imagekitio>=4.1.0",
+    "itsdangerous>=2.2.0",
+    "jinja2>=3.1.4",
+    "psycopg2>=2.9.10",
+    "pydantic>=2.9.0",
+    "pyjwt>=2.9.0",
+    "pytest>=8.3.2",
+    "python-dotenv>=1.0.1",
+    "python-gnupg>=0.5.2",
+    "python-multipart>=0.0.9",
+    "pytz>=2024.1",
+    "pyyaml>=6.0.2",
+    "requests>=2.32.3",
+    "ruff>=0.6.4",
+    "sqlmodel>=0.0.22",
+    "ulid-py>=1.1.0",
+    "uvicorn>=0.30.6",
+]
+
+[tool.ruff]
+# Enable Pyflakes `E` and `F` codes by default.
+select = ["E", "F"]
+ignore = ["E402"]
+
+line-length = 180
+
+[tool.ruff.isort]
+force-sort-within-sections = true
+order-by-type = true
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["E402", "F401"]

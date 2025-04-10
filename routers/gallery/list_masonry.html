@@ -1,0 +1,43 @@
+{% if user %}
+<div class="flex flex-row mt-5">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        {% if query_code == 0 %}
+        <p class="text-xs font-bold text-black-700">
+            {{query_result}}
+        </p>
+        {% else %}
+        <p class="text-xs font-bold text-red-700">
+            {{query_result}}
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        {% for search in search_list %}
+        <a class="mr-2" href="/gallery?name={{search.name}}&query={{search.query}}">
+            <button class="rounded-full text-xs font-bold text-white bg-sky-400 py-1 px-2">{{search.name}}</button>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="flex mt-20">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        <div class="columns-3 gap-20">
+            {% for product in products_list %}
+            <div class="flex flex-col mb-10">
+                <a class="mb-5" href="/products/{{product.id}}">
+                    <img src="{{ images_map.get(product.id) }}"></img>
+                </a>
+                <p class="mb-0 text-xs font-normal text-zinc-400">{{ product.name }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

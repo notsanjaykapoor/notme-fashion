@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], ".."))
+
+import dot_init
+
+import click
+
+import models
+import services.database.session
+import services.users
+
+
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+@click.option("--email", required=True, help="user email")
+@click.option("--handle", required=True, help="user handle")
+@click.option("--idp", required=True, help="idp name, e.g. google")
+def create(email: str, handle: str, idp: str) -> int:
+    """
+    create user
+    """
+    print(f"user '{email}' check", end=" ... ")
+
+    with services.database.session.get() as db_session:
+        user = services.users.get_by_email(db_session=db_session, email=email)
+
+        if user:
+            _print_ok("exists")
+            return 0
+
+        _print_status("create")
+
+        # create user
+
+        user = models.User(
+            email=email,
+            handle=handle,
+            idp=idp,
+            state=models.user.STATE_ACTIVE,
+            tz=models.user.TZ_DEFAULT,
+        )
+
+        db_session.add(user)
+        db_session.commit()
+
+        _print_ok(f"user '{email}' created")
+
+
+def _print_error(s: str):
+    print("\x1b[1;31m" + s + "\x1b[0m")
+
+
+def _print_ok(s: str):
+    print("\x1b[1;32m" + s + "\x1b[0m")
+
+
+def _print_status(s: str):
+    print("\x1b[1;33m" + s + "\x1b[0m")
+
+
+cli.add_command(create)
+
+if __name__ == "__main__":
+    cli()

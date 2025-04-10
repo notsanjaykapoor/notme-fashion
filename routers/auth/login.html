@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col mx-auto mt-10">
+    <h3 class="mx-auto font-bold">
+        {{ app_name }}
+    </h3>
+    <div class="mt-2 mx-auto text-xs text-zinc-400">
+        @{{ app_version }}
+    </div>
+</div>
+
+<form id="login-form" hx-ext="json-enc" hx-post="/login" hx-target="#login-status">
+    <div class="flex mx-auto mt-20">
+        <div class="font-normal mx-auto text-sm">
+            <input type="email" name="email" value="{{email}}" placeholder="{{prompt_text}}" autocomplete="off" required
+                class="peer px-0 py-2.5 h-full text-center min-w-80 border-b bg-transparent font-sans text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-pink-600 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+        </div>
+    </div>
+    <div class="flex mx-auto mt-10">
+        <div class="flex mx-auto font-normal text-xs mx-2">
+            <button type="submit"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-5 py-2.5 me-2 mb-2 hover:bg-blue-700 focus:outline-none">
+                Continue
+            </button>
+        </div>
+    </div>
+</form>
+
+<div class="flex mx-auto mt-10" id="login-status">
+</div>
+
+{% endblock %}
