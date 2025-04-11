@@ -5,6 +5,14 @@ import sqlmodel
 import models
 
 
+def get_by_grailed_id(db_session: sqlmodel.Session, grailed_id: int) -> typing.Optional[models.Product]:
+    """ """
+    db_select = sqlmodel.select(models.Product).where(models.Product.grailed_id == grailed_id)
+    db_object = db_session.exec(db_select).first()
+
+    return db_object
+
+
 def get_by_id(db_session: sqlmodel.Session, id: int) -> typing.Optional[models.Product]:
     """ """
     db_select = sqlmodel.select(models.Product).where(models.Product.id == id)

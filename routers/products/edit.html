@@ -9,7 +9,7 @@
             back
         </a>
     </div>
-    <div class="w-9/12 justify-center">
+    <div class="w-8/12 justify-center">
         <div class="flex flex-col">
             <h3 class="mx-auto font-bold">
                 {{ app_name }}
@@ -20,5 +20,23 @@
         </div>
     </div>
 </div>
+
+<div class="flex flex-col mx-auto mt-5 w-full" id="product-data">
+    {% include "products/edit_data.html" %}
+</div>
+
+<div class="flex flex-col mx-auto mb-20 mt-5 w-full" id="images-table">
+    {% include "products/edit_images.html" %}
+</div>
+
+<script>
+    // listen on parent element since child elements are replaced on update
+    const parent = document.getElementById("product-data")
+
+    parent.addEventListener("keyup", (event) => {
+        document.getElementById("product-status").classList.add("text-amber-400")
+        document.getElementById("product-status").innerText = "changes detected, not saved"
+    })
+</script>
 
 {% endblock %}

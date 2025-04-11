@@ -19,8 +19,9 @@
     <div class="w-1/12"></div>
     <div class="w-10/12">
         {% for search in search_list %}
+        {% set tag_color = "bg-sky-400" if search.active == 1 else "bg-blue-700" %}
         <a class="mr-2" href="/gallery?name={{search.name}}&query={{search.query}}">
-            <button class="rounded-full text-xs font-bold text-white bg-sky-400 py-1 px-2">{{search.name}}</button>
+            <button class="rounded-full text-xs font-bold text-white {{tag_color}} py-1 px-2">{{search.name}}</button>
         </a>
         {% endfor %}
     </div>
@@ -28,14 +29,19 @@
 
 <div class="flex mt-20">
     <div class="w-1/12"></div>
-    <div class="w-10/12">
-        <div class="columns-3 gap-20">
+    <div class="{{masonry_width}}">
+        <div class="{{masonry_columns}} gap-20">
             {% for product in products_list %}
             <div class="flex flex-col mb-10">
                 <a class="mb-5" href="/products/{{product.id}}">
-                    <img src="{{ images_map.get(product.id) }}"></img>
+                    <img class="w-full" src="{{ images_map.get(product.id) }}"></img>
                 </a>
-                <p class="mb-0 text-xs font-normal text-zinc-400">{{ product.name }}</p>
+                <p class="text-xs font-normal text-zinc-400">
+                    {{ product.name }}
+                    <span class="float-right mr-0">
+                        {{ product.image_count }}
+                    </span>
+                </p>
             </div>
             {% endfor %}
         </div>

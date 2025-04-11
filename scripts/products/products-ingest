@@ -54,30 +54,23 @@ def run(file_id: str, file_output: str, user_email: str):
             print(row)
 
             product_name = row.get("name").strip().lower()
-            source_id = row.get("grailed_id").strip()
+            grailed_id = int(row.get("grailed_id").strip() or 0)
 
             product_brands = [s.strip().lower() for s in row.get("brands").split(",") if s.strip()]
             product_cats = [s.strip().lower() for s in row.get("category").split(",") if s.strip()]
             product_tags = [s.strip().lower() for s in row.get("tags").split(",") if s.strip()]
 
-            if source_id:
-                source_name = models.product.SOURCE_GRAILED
-                product_state = models.product.STATE_SELL
-            else:
-                source_id = ulid.new().str
-                source_name = models.product.SOURCE_NOTME
-                product_state = models.product.STATE_DISPLAY
+            product_state = models.product.STATE_ACTIVE
 
             with services.database.session.get() as db_session:
                 user = services.users.get_by_email(db_session=db_session, email=user_email)
 
-                product = services.products.get_by_source(
-                    db_session=db_session,
-                    source_id=source_id,
-                    source_name=source_name,
-                )
-
-                if not product:
+                if grailed_id:
+                    product = services.products.get_by_grailed_id(
+                        db_session=db_session,
+                        grailed_id=grailed_id,
+                    )
+                else:
                     product = services.products.get_by_name(
                         db_session=db_session,
                         name=product_name,
@@ -85,8 +78,10 @@ def run(file_id: str, file_output: str, user_email: str):
 
                 product_data = {
                     "color": row.get("color", "").strip().lower(),
+                    "material": row.get("material", "").strip().lower(),
                     "model": row.get("model", "").strip().lower(),
                     "season": row.get("season", "").strip().lower(),
+                    "size": row.get("size", "").strip().lower(),
                 }
 
                 if product:
@@ -94,24 +89,26 @@ def run(file_id: str, file_output: str, user_email: str):
                 else:
                     product = services.products.create(
                         db_session=db_session,
+                        grailed_id=grailed_id,
                         key=ulid.new().str,
                         name=product_name,
-                        source_id=source_id,
-                        source_name=source_name,
+                        source_id=ulid.new().str,
+                        source_name=models.product.SOURCE_NOTME,
+                        state=product_state,
                         user_id=user.id,
                     )
 
                     _print_ok(f"product {product.id} created")
 
                 # create product images
-                image_urls = [s.strip() for s in row.get("images").split(",") if s.strip()]
+                image_urls = [s.strip() for s in row.get("images").split(",") if s.strip().startswith("https:")]
 
                 for image_url in image_urls:
                     code, image = services.products.images.create(
                         db_session=db_session,
+                        product=product,
                         folder="/products",
                         url=image_url,
-                        product=product,
                     )
 
                     if code == 409:
@@ -128,10 +125,16 @@ def run(file_id: str, file_output: str, user_email: str):
                     tags=product_tags,
                 )
 
+                services.products.sync_images(
+                    db_session=db_session,
+                    product=product,
+                )
+
                 if product.state != product_state:
                     product.state = product_state
                     db_session.add(product)
                     db_session.commit()
+
 
 def _print_error(s: str):
     print("\x1b[1;31m" + s + "\x1b[0m", flush=True)

@@ -15,7 +15,7 @@ def sync_versions(db_session: sqlmodel.Session, product: models.Product) -> int:
     client = services.imagek.client()
 
     for image in images_list:
-        versions_results = client.get_file_versions(file_id=image.data.get("fileId"))
+        versions_results = client.get_file_versions(file_id=image.data_file_id)
         image_version_url = versions_results.list[0].url
 
         if image_version_url != image.url:

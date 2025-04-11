@@ -32,7 +32,10 @@ def products_show(
 
     logger.info(f"{context.rid_get()} product {product_id} try")
 
-    referer_path = request.headers.get("referer")
+    referer_path = request.headers.get("referer", "")
+
+    if "edit" in referer_path:
+        referer_path = "/gallery"
 
     try:
         product = services.products.get_by_id(
@@ -43,8 +46,10 @@ def products_show(
         list_result = services.products.images.list(
             db_session=db_session,
             query=f"product_id:{product.id}",
+            sort="id+",
         )
         images_list = list_result.objects
+        images_count = len(images_list)
 
         for image in images_list:
             # transform uri
@@ -54,6 +59,16 @@ def products_show(
     except Exception as e:
         logger.error(f"{context.rid_get()} product {product_id} exception '{e}'")
         return fastapi.responses.RedirectResponse(referer_path)
+
+    if images_count == 1:
+        masonry_columns = "columns-1"
+        masonry_width = "w-4/12"
+    elif images_count == 2:
+        masonry_columns = "columns-2"
+        masonry_width = "w-8/12"
+    else:
+        masonry_columns = "columns-3"
+        masonry_width = "w-10/12"
 
     if "HX-Request" in request.headers:
         template = "products/show_table.html"
@@ -66,7 +81,10 @@ def products_show(
             template,
             {
                 "app_name": "Product Details",
+                "images_count": images_count,
                 "images_list": images_list,
+                "masonry_columns": masonry_columns,
+                "masonry_width": masonry_width,
                 "product": product,
                 "referer_path": referer_path,
                 "user": user,

@@ -21,3 +21,11 @@ class ProductImage(sqlmodel.SQLModel, table=True):
     position: int = sqlmodel.Field(default=0, nullable=False)
     product_id: int = sqlmodel.Field(index=True, nullable=False)
     url: str = sqlmodel.Field(index=False, nullable=False)
+
+    @property
+    def data_file_id(self) -> str:
+        return self.data.get("fileId")
+
+    @property
+    def data_thumbnail_url(self) -> str:
+        return self.data.get("thumbnailUrl")

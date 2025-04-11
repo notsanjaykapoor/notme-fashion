@@ -1,6 +1,5 @@
 import hashlib
 import secrets
-import typing
 
 import imagekitio.models.UploadFileRequestOptions
 import sqlmodel
@@ -11,10 +10,10 @@ import services.products.images
 
 def create(
     db_session: sqlmodel.Session,
+    product: models.Product,
     folder: str,
     url: str,
-    product: models.Product,
-) -> tuple[int, typing.Optional[models.ProductImage]]:
+) -> tuple[int, models.ProductImage | None]:
     """
     Upload image, create product image and persist to database
     """

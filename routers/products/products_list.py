@@ -43,6 +43,8 @@ def products_list(
             query=query,
             offset=offset,
             limit=limit,
+            sort="id-",
+            scope="",
         )
         products_list = list_result.objects
 

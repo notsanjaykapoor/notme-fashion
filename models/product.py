@@ -5,11 +5,10 @@ import sqlalchemy
 import sqlalchemy.dialects.postgresql
 import sqlmodel
 
-SOURCE_GRAILED = "grailed"
 SOURCE_NOTME = "notme"
 
-STATE_DISPLAY = "display"
-STATE_SELL = "sell"
+STATE_ACTIVE = "active"
+STATE_DRAFT = "draft"
 
 
 class Product(sqlmodel.SQLModel, table=True):
@@ -36,6 +35,7 @@ class Product(sqlmodel.SQLModel, table=True):
     data: dict = sqlmodel.Field(
         default_factory=dict, sa_column=sqlmodel.Column(sqlmodel.JSON)
     )
+    grailed_id: int = sqlmodel.Field(index=True, nullable=True, default=0)
     image_count: int = sqlmodel.Field(index=True, nullable=True, default=0)
     image_urls: list[str] = sqlmodel.Field(
         default=[],
@@ -78,6 +78,17 @@ class Product(sqlmodel.SQLModel, table=True):
         return self.data.get("color", "")
 
     @property
+    def grailed_url(self) -> str:
+        if self.grailed_id > 0:
+            return f"https://www.grailed.com/listings/{self.grailed_id}"
+
+        return ""
+
+    @property
+    def material(self) -> str:
+        return self.data.get("material", "")
+
+    @property
     def model(self) -> str:
         return self.data.get("model", "")
 
@@ -86,11 +97,8 @@ class Product(sqlmodel.SQLModel, table=True):
         return self.data.get("season", "")
 
     @property
-    def source_url(self) -> str:
-        if self.source_name == SOURCE_GRAILED:
-            return f"https://www.grailed.com/listings/{self.source_id}"
-        
-        return ""
+    def size(self) -> str:
+        return self.data.get("size", "")
 
     @property
     def tags_string(self) -> str:

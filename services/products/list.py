@@ -20,7 +20,7 @@ class Struct:
 
 
 def list(
-    db_session: sqlmodel.Session, query: str = "", offset: int = 0, limit: int = 20
+    db_session: sqlmodel.Session, query: str = "", offset: int = 0, limit: int = 20, scope: str="", sort: str="id+"
 ) -> Struct:
     """
     Search products table
@@ -43,6 +43,9 @@ def list(
     if query and ":" not in query:
         query_normalized = f"name:{query}"
 
+    if scope:
+        query_normalized = f"{query_normalized} {scope}".strip()
+
     struct_tokens = services.mql.parse(query_normalized)
 
     for token in struct_tokens.tokens:
@@ -52,6 +55,11 @@ def list(
             values = [s.strip() for s in value.lower().split(",")]
             dataset = dataset.where(model.categories.contains(values))
             struct.categories = values
+        elif token["field"] == "grailed":
+            if int(value) == 1:
+                dataset = dataset.where(model.grailed_id > 0)
+            else:
+                dataset = dataset.where(model.grailed_id == 0)
         elif token["field"] == "key":
             dataset = dataset.where(model.key == value)
         elif token["field"] == "name":
@@ -71,7 +79,12 @@ def list(
         elif token["field"] in ["uid", "user_id"]:
             dataset = dataset.where(model.user_id == int(value))
 
-    struct.objects = db_session.exec(dataset.offset(offset).limit(limit).order_by(model.id)).all()
+    if sort == "id-":
+        dataset = dataset.order_by(model.id.desc())
+    else: # defaults to id+
+        dataset = dataset.order_by(model.id.asc())
+
+    struct.objects = db_session.exec(dataset.offset(offset).limit(limit)).all()
     struct.count = len(struct.objects)
     struct.total = db_session.scalar(
         sqlmodel.select(sqlalchemy.func.count("*")).select_from(dataset.subquery())

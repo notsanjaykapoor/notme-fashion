@@ -1,0 +1,62 @@
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-10/12 border-b-2 border-slate-100 text-zinc-800 pb-5">
+        <p class="font-semibold text-xs text-black">Product Images - {{images_count}}</p>
+    </div>
+</div>
+
+<div class="flex flex-row mt-0">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        <table class="w-full">
+            <thead class="font-normal text-center text-xs leading-6 text-zinc-800">
+                <tr>
+                    <th class="p-4 text-left">name</th>
+                    <th class="p-4">position</th>
+                    <th class="p-4">id</th>
+                    <th class="p-4">image</th>
+                    <th class="p-4"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for image in images_list %}
+                <tr class="group hover:bg-zinc-50 odd:bg-white even:bg-slate-50 text-center text-xs">
+                    <td class="p-4 font-normal text-left">
+                        {{image.name}}
+                    </td>
+                    <td class="p-4 font-normal">
+                        {{image.position}}
+                    </td>
+                    <td class="p-4 font-normal">
+                        {{image.id}}
+                    </td>
+                    <td class="p-4 font-normal">
+                        <a href="{{image.url}}" target="_href" class="flex justify-center">
+                            <img src="{{thumbnails_map.get(image.id)}}" class="">
+                        </a>
+                    </td>
+                    <td class="p-0 font-normal">
+                        <a class="flex justify-end pr-5" href="/products/{{product.id}}/delete?image_id={{image.id}}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="text-red-500 size-5">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM6.75 9.25a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-10/12 font-normal text-xs">
+        <input type="search" name="image_url" value="" placeholder="add image, e.g. https://www.image.url"
+            autocomplete="off" hx-get="/products/{{product.id}}/add" hx-target="#images-table" hx-trigger="search"
+            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>

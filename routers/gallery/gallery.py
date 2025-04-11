@@ -35,7 +35,7 @@ def gallery_list(
 ):
     user = services.users.get_by_id(db_session=db_session, id=user_id)
 
-    logger.info(f"{context.rid_get()} gallery query '{query}' try")
+    logger.info(f"{context.rid_get()} gallery name '{name}' query '{query}' try")
 
     try:
         list_result = services.products.list(
@@ -43,6 +43,8 @@ def gallery_list(
             query=query,
             offset=offset,
             limit=limit,
+            sort="id-",
+            scope="state:active",
         )
         products_list = list_result.objects
         total_count = list_result.total
@@ -64,13 +66,31 @@ def gallery_list(
 
         logger.error(f"{context.rid_get()} gallery query '{query}' exception '{e}'")
 
+    products_count = len(products_list)
+
+    if products_count == 1:
+        masonry_columns = "columns-1"
+        masonry_width = "w-4/12"
+    elif products_count == 2:
+        masonry_columns = "columns-2"
+        masonry_width = "w-8/12"
+    else:
+        masonry_columns = "columns-3"
+        masonry_width = "w-10/12"
+
     search_list =[
         models.ProductSearch(name="all", query=""),
-        models.ProductSearch(name="for sale", query="state:sell"),
-        models.ProductSearch(name="pants", query="category:pants"),
-        models.ProductSearch(name="tops", query="category:tops"),
+        models.ProductSearch(name="for sale", query="grailed:1"),
+        models.ProductSearch(name="jackets", query="category:jackets"),
         models.ProductSearch(name="knitwear", query="category:knitwear"),
+        models.ProductSearch(name="pants", query="category:pants"),
+        models.ProductSearch(name="shoes", query="category:shoes"),
+        models.ProductSearch(name="tops", query="category:tops"),
     ]
+
+    for search_object in search_list:
+        if search_object.name == name:
+            search_object.active = 1
 
     if "HX-Request" in request.headers:
         template = "gallery/list_masonry.html"
@@ -89,9 +109,12 @@ def gallery_list(
             {
                 "app_name": app_name,
                 "images_map": images_map,
+                "masonry_columns": masonry_columns,
+                "masonry_width": masonry_width,
                 "page_limit": limit,
                 "page_offset": offset,
                 "products_list": products_list,
+                "products_count": products_count,
                 "query": query,
                 "query_code": query_code,
                 "query_result": query_result,

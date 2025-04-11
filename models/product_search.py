@@ -5,3 +5,4 @@ import dataclasses
 class ProductSearch:
     name: str
     query: str
+    active: int = 0

@@ -19,7 +19,7 @@ class Struct:
 
 
 def list(
-    db_session: sqlmodel.Session, query: str = "", offset: int = 0, limit: int = 20
+    db_session: sqlmodel.Session, query: str = "", offset: int = 0, limit: int = 20, sort: str="id+"
 ) -> Struct:
     """
     Search product images table
@@ -59,7 +59,12 @@ def list(
         elif token["field"] in ["pid", "product_id"]:
             dataset = dataset.where(model.product_id == int(value))
 
-    struct.objects = db_session.exec(dataset.offset(offset).limit(limit).order_by(model.id)).all()
+    if sort == "id+":
+        dataset = dataset.order_by(model.id.asc())
+    else: # defaults to id-
+        dataset = dataset.order_by(model.id.desc())
+
+    struct.objects = db_session.exec(dataset.offset(offset).limit(limit)).all()
     struct.count = len(struct.objects)
     struct.total = db_session.scalar(
         sqlmodel.select(sqlalchemy.func.count("*")).select_from(dataset.subquery())

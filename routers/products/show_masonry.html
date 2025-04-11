@@ -1,13 +1,31 @@
 <div class="flex mt-10">
     <div class="w-1/12"></div>
-    <div class="w-10/12">
-        <div class="columns-2 gap-10">
+
+    {% if images_count == 1 %}
+
+    <div class="w-4/12">
+        <div class="columns-1 gap-10">
             {% for image in images_list %}
             <div class="flex flex-col mb-10">
-                <img src="{{ image.url }}"></img>
-                <p class="mb-0 text-xs font-normal text-zinc-400">{{ product.name }}</p>
+                <img class="mb-5 w-full" src="{{ image.url }}"></img>
+                <div class="text-xs font-normal text-zinc-400">{{ product.name }}</div>
             </div>
             {% endfor %}
         </div>
     </div>
+
+    {% else %}
+
+    <div class="{{masonry_width}}">
+        <div class="{{masonry_columns}} gap-20">
+            {% for image in images_list %}
+            <div class="flex flex-col mb-10">
+                <img class="mb-5 w-full" src="{{ image.url }}"></img>
+                <div class="text-xs font-normal text-zinc-400">{{ product.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% endif %}
 </div>

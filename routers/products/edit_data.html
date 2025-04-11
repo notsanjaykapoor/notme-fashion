@@ -1,0 +1,152 @@
+<div class="flex flex-row mt-20">
+    <div class="w-1/12"></div>
+    <div class="w-10/12 border-b-2 border-slate-100 text-zinc-800 pb-5">
+        <p class="font-semibold text-xs text-black">Product Data</p>
+    </div>
+</div>
+
+<div class="flex flex-row mt-5">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            name
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="name" value="{{product.name}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            color
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="color" value="{{product.color}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            material
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="material" value="{{product.material}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            size
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="size" value="{{product.size}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            model
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="model" value="{{product.model}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            season
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="season" value="{{product.season}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            brand
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="brands" value="{{product.brands_string}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            grailed id
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="grailed_id" value="{{product.grailed_id}}" autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>
+
+<div class="flex flex-row mt-3">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            state
+        </label>
+    </div>
+    <div class="w-4/12 text-xs">
+        <input type="search" name="state" value="{{product.state}}" readonly autocomplete="off"
+            hx-get="/products/{{product.id}}/update" hx-target="#product-data" hx-trigger="search"
+            class="product-field search-primary text-zinc-400 px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+    <div class="w-1/12 text-xs flex items-center ml-5">
+        {% if product.state == "draft" %}
+        <a href="" title="publish product" hx-get="/products/{{product.id}}/publish" hx-target="#product-data">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                class="size-6 text-blue-600">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM6.75 9.25a.75.75 0 0 0 0 1.5h4.59l-2.1 1.95a.75.75 0 0 0 1.02 1.1l3.5-3.25a.75.75 0 0 0 0-1.1l-3.5-3.25a.75.75 0 1 0-1.02 1.1l2.1 1.95H6.75Z"
+                    clip-rule="evenodd" />
+            </svg>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="flex flex-row mt-5 visible">
+    <div class="w-2/12"></div>
+    <div class="w-4/12 flex items-center text-xs text-amber-400" id="product-status">
+        {{ status_message }}
+    </div>
+</div>

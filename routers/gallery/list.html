@@ -12,12 +12,12 @@
 </div>
 
 {% if user %}
-<div class="flex flex-row mx-auto mt-10">
+<div class="flex flex-row mx-auto mt-5">
     <div class="w-1/12"></div>
     <div class="w-4/12 font-normal text-xs">
         <input type="search" name="query" value="{{query}}" placeholder="search gallery" autocomplete="off"
             hx-get="/gallery" hx-target="#masonry" hx-trigger="input changed delay:750ms, search"
-            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent font-sans outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
 {% endif %}
