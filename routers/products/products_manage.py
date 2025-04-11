@@ -1,6 +1,7 @@
 import fastapi
 import fastapi.responses
 import fastapi.templating
+import re
 import sqlalchemy.orm.attributes
 import sqlmodel
 import ulid
@@ -9,6 +10,7 @@ import context
 import log
 import main_shared
 import models
+import services.grailed
 import services.products
 import services.products.images
 import services.users
@@ -37,12 +39,45 @@ def products_create(
         return fastapi.responses.RedirectResponse("/login")
 
     user = services.users.get_by_id(db_session=db_session, id=user_id)
+    name = name.strip().lower()
 
     logger.info(f"{context.rid_get()} product create '{name}' try")
 
     try:
+        if name.startswith("grailed:"):
+            _, grailed_id = name.split(":")
+
+            # check if product exists
+
+            product = services.products.get_by_grailed_id(
+                db_session=db_session,
+                grailed_id=grailed_id,
+            )
+
+            if product:
+                raise Exception(f"product {product.id} exists")
+
+            # download and parse grailed listing
+
+            code, html_path = services.grailed.download(grailed_id=grailed_id)
+
+            if code not in [0, 409]:
+                raise Exception(f"download error {code}")
+
+            parse_result = services.grailed.parse(html_path=html_path)
+
+            if parse_result.code != 0:
+                raise Exception(f"parse error {parse_result.code}")
+
+            name = parse_result.name
+            image_urls = parse_result.image_urls[0:2]
+        else:
+            image_urls = []
+            grailed_id = 0
+
         product = services.products.create(
             db_session=db_session,
+            grailed_id=grailed_id,
             key=ulid.new().str,
             name=name,
             source_id=ulid.new().str,
@@ -51,19 +86,33 @@ def products_create(
             user_id=user.id,
         )
 
-        goto_path = f"/products/{product.id}/edit"
+        for image_url in image_urls:
+            image_url = re.sub(r"\?.*", "", image_url)
+
+            code, _image = services.products.images.create(
+                db_session=db_session,
+                product=product,
+                folder="/products",
+                url=image_url,
+            )
+
+        services.products.sync_images(
+            db_session=db_session,
+            product=product,
+        )
+
+        redirect_path = f"/products/{product.id}/edit"
         logger.info(f"{context.rid_get()} product create '{name}' ok - product {product.id}")
     except Exception as e:
-        goto_path = f"/products"
+        redirect_path = f"/products"
         logger.error(f"{context.rid_get()} product create exception '{e}'")
-
 
     if "HX-Request" in request.headers:
         response = templates.TemplateResponse(request, "201.html")
-        response.headers["HX-Redirect"] = goto_path
+        response.headers["HX-Redirect"] = redirect_path
         return response
     else:
-        return fastapi.responses.RedirectResponse(goto_path)
+        return fastapi.responses.RedirectResponse(redirect_path)
 
 
 @app.get("/products/{product_id}/add", response_class=fastapi.responses.HTMLResponse)
@@ -255,6 +304,43 @@ def products_edit(
         return templates.TemplateResponse(request, "500.html", {})
 
     return response
+
+
+@app.get("/products/{product_id}/publish", response_class=fastapi.responses.HTMLResponse)
+def products_publish(
+    request: fastapi.Request,
+    product_id: int,
+    user_id: int = fastapi.Depends(main_shared.get_user_id),
+    db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
+):
+    if user_id == 0:
+        return fastapi.responses.RedirectResponse("/login")
+
+    logger.info(f"{context.rid_get()} product {product_id} publish try")
+
+    try:
+        product = services.products.get_by_id(
+            db_session=db_session,
+            id=product_id,
+        )
+
+        if product.state == models.product.STATE_DRAFT:
+            product.state = models.product.STATE_ACTIVE
+            db_session.add(product)
+            db_session.commit()
+
+        logger.info(f"{context.rid_get()} product {product_id} publish ok")
+    except Exception as e:
+        logger.error(f"{context.rid_get()} product {product_id} publish exception '{e}'")
+
+    redirect_path = f"/products/{product.id}/edit"
+
+    if "HX-Request" in request.headers:
+        response = templates.TemplateResponse(request, "201.html")
+        response.headers["HX-Redirect"] = redirect_path
+        return response
+    else:
+        return fastapi.responses.RedirectResponse(redirect_path)
 
 
 @app.get("/products/{product_id}/update", response_class=fastapi.responses.HTMLResponse)

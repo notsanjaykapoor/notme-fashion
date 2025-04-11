@@ -21,6 +21,7 @@ import routers.gallery.gallery
 import routers.products.products_list
 import routers.products.products_manage
 import routers.products.products_show
+import routers.site.site
 import services.database
 import services.users
 
@@ -54,6 +55,7 @@ app.include_router(routers.gallery.gallery.app)
 app.include_router(routers.products.products_list.app)
 app.include_router(routers.products.products_manage.app)
 app.include_router(routers.products.products_show.app)
+app.include_router(routers.site.site.app)
 
 # mount traditional static directory
 app.mount("/static", fastapi.staticfiles.StaticFiles(directory="static"), name="static")
@@ -105,11 +107,7 @@ def favicon():
 
 
 @app.get("/")
-def home(
-    request: fastapi.Request,
-    user_id: int = fastapi.Depends(main_shared.get_user_id),
-    db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
-):
+def home():
     logger.info(f"{context.rid_get()} home")
 
     return fastapi.responses.RedirectResponse("/gallery")

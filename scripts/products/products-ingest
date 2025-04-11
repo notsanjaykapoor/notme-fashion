@@ -2,6 +2,7 @@
 
 import csv
 import os
+import re
 import subprocess
 import sys
 
@@ -9,11 +10,13 @@ sys.path.insert(1, os.path.join(sys.path[0], "../.."))
 
 import dot_init
 
+import bs4
 import click
 import ulid
 
 import models
 import services.database
+import services.grailed
 import services.products
 import services.products.images
 import services.users
@@ -27,9 +30,9 @@ def cli():
 @click.option("--file-id", default="1rSHZMWA4AKoshCyMCo7gf7hxK_aonnESaGqWtUnwFmw", required=False, help="google file id")
 @click.option("--file-output", default="products.csv", required=False, help="output file name")
 @click.option("--user", "user_email", default="notsanjaykapoor@gmail.com", required=False, help="user email")
-def run(file_id: str, file_output: str, user_email: str):
+def csv(file_id: str, file_output: str, user_email: str):
     """
-    
+    Ingest csv
     """
     _print_status(f"file '{file_id}' download '{file_output}' try")
 
@@ -136,6 +139,82 @@ def run(file_id: str, file_output: str, user_email: str):
                     db_session.commit()
 
 
+@click.command()
+@click.option("--id", "grailed_id", default=None, required=True, help="grailed listing id")
+@click.option("--user", "user_email", default="notsanjaykapoor@gmail.com", required=False, help="user email")
+def grailed(grailed_id: int, user_email: str):
+    """
+    Ingest listing from grailed website.
+    """
+    _print_status(f"grailed id {grailed_id} ingest")
+
+    code, html_path = services.grailed.download(grailed_id=grailed_id)
+
+    if code == 0:
+        _print_ok(f"grailed file '{html_path}' downloaded")        
+    elif code == 409:
+        _print_status(f"grailed file '{html_path}' exists")
+
+    _print_status(f"grailed file '{html_path}' parse")
+
+    parse_result = services.grailed.parse(html_path=html_path)
+
+    print(parse_result)
+
+    if parse_result.code != 0:
+        pass
+
+    with services.database.session.get() as db_session:
+        user = services.users.get_by_email(db_session=db_session, email=user_email)
+
+        product = services.products.get_by_grailed_id(
+            db_session=db_session,
+            grailed_id=grailed_id,
+        )
+
+        if product:
+            _print_status(f"product {product.id} exists")
+        else:
+            product = services.products.create(
+                db_session=db_session,
+                grailed_id=grailed_id,
+                key=ulid.new().str,
+                name=parse_result.name,
+                source_id=ulid.new().str,
+                source_name=models.product.SOURCE_NOTME,
+                state=models.product.STATE_DRAFT,
+                user_id=user.id,
+            )
+
+            _print_ok(f"product {product.id} created")
+
+        # check product images
+        for image_url in parse_result.image_urls[0:2]:
+            image_url = re.sub(r"\?.*", "", image_url)
+
+            code, image = services.products.images.create(
+                db_session=db_session,
+                product=product,
+                folder="/products",
+                url=image_url,
+            )
+
+            if code == 409:
+                _print_status(f"product {product.id} image {image.id} exists")
+            else:
+                _print_ok(f"product {product.id} image {image.id} created")
+
+        services.products.sync_images(
+            db_session=db_session,
+            product=product,
+        )
+
+        if product.state != models.product.STATE_ACTIVE and product.image_count > 0:
+            product.state = models.product.STATE_ACTIVE
+            db_session.add(product)
+            db_session.commit()
+
+
 def _print_error(s: str):
     print("\x1b[1;31m" + s + "\x1b[0m", flush=True)
 
@@ -148,7 +227,8 @@ def _print_status(s: str):
     print("\x1b[1;36m" + s + "\x1b[0m", flush=True)
 
 
-cli.add_command(run)
+cli.add_command(csv)
+cli.add_command(grailed)
 
 if __name__ == "__main__":
     cli()

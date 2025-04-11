@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.13.2",
+    "beautifulsoup4>=4.13.3",
     "click>=8.1.7",
     "coloredlogs>=15.0.1",
     "fastapi>=0.113.0",
