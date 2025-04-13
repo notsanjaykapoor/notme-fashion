@@ -1,7 +1,14 @@
+import io
+import os
+import re
+
 import fastapi
 import fastapi.responses
 import fastapi.templating
-import re
+import numpy
+import PIL.Image
+import rembg
+import requests
 import sqlalchemy.orm.attributes
 import sqlmodel
 import ulid
@@ -43,6 +50,8 @@ def products_create(
 
     logger.info(f"{context.rid_get()} product create '{name}' try")
 
+    redirect_path = ""
+
     try:
         # check if name is a grailed url
         if grailed_url := services.grailed.listing_url_match(url=name):
@@ -56,6 +65,7 @@ def products_create(
             )
 
             if product:
+                redirect_path = f"/products/{product.id}"
                 raise Exception(f"product {product.id} exists")
 
             # download and parse grailed listing
@@ -105,7 +115,8 @@ def products_create(
         redirect_path = f"/products/{product.id}/edit"
         logger.info(f"{context.rid_get()} product create '{name}' ok - product {product.id}")
     except Exception as e:
-        redirect_path = f"/products"
+        if not redirect_path:
+            redirect_path = f"/products"
         logger.error(f"{context.rid_get()} product create exception '{e}'")
 
     if "HX-Request" in request.headers:
@@ -342,6 +353,70 @@ def products_publish(
         return response
     else:
         return fastapi.responses.RedirectResponse(redirect_path)
+
+
+@app.get("/products/{product_id}/rembg", response_class=fastapi.responses.HTMLResponse)
+def products_rembg(
+    request: fastapi.Request,
+    product_id: int,
+    image_id: int,
+    user_id: int = fastapi.Depends(main_shared.get_user_id),
+    db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
+):
+    if user_id == 0:
+        return fastapi.responses.RedirectResponse("/login")
+
+    logger.info(f"{context.rid_get()} product {product_id} image {image_id} rembg try")
+
+    try:
+        product = services.products.get_by_id(
+            db_session=db_session,
+            id=product_id,
+        )
+
+        list_result = services.products.images.list(
+            db_session=db_session,
+            query=f"product_id:{product.id}",
+        )
+        images_list = list_result.objects
+        image = [image for image in images_list if image.id == image_id][0]
+
+        r = requests.get(image.url, stream=True)
+        if r.status_code != 200:
+            raise Exception(f"get request error code {r.status_code}")
+
+        logger.info(f"{context.rid_get()} product {product_id} image {image_id} download starting")
+
+        output_file = f"{image.name}-white.webp"
+        output_url = f"file://localhost/{os.getcwd()}/{output_file}"
+
+        input_image = PIL.Image.open(io.BytesIO(r.content))
+        input_array = numpy.array(input_image)
+        output_array = rembg.remove(input_array, bgcolor=(255, 255, 255, 255))
+        output_image = PIL.Image.fromarray(output_array)
+        output_image.save(output_file)
+
+        logger.info(f"{context.rid_get()} product {product_id} image {image_id} rembg complete")
+
+        code, _image = services.products.images.create(
+            db_session=db_session,
+            product=product,
+            folder="/products",
+            url=output_url,
+        )
+
+        services.products.sync_images(
+            db_session=db_session,
+            product=product,
+        )
+
+        logger.info(f"{context.rid_get()} product {product_id} image {image_id} upload complete")
+
+        logger.info(f"{context.rid_get()} product {product_id} image {image_id} rembg ok")
+    except Exception as e:
+        logger.error(f"{context.rid_get()} product {product_id} image {image_id} rembg exception '{e}'")
+
+    return fastapi.responses.RedirectResponse(f"/products/{product_id}/edit")
 
 
 @app.get("/products/{product_id}/update", response_class=fastapi.responses.PlainTextResponse)

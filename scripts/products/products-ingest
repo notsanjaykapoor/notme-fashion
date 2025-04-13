@@ -157,7 +157,7 @@ def grailed(grailed_id: int, user_email: str):
 
     _print_status(f"grailed file '{html_path}' parse")
 
-    parse_result = services.grailed.parse(html_path=html_path)
+    parse_result = services.grailed.parse_html(html_path=html_path)
 
     print(parse_result)
 

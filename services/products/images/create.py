@@ -5,6 +5,7 @@ import imagekitio.models.UploadFileRequestOptions
 import sqlmodel
 
 import models
+import services.files
 import services.imagek
 import services.products.images
 
@@ -15,7 +16,7 @@ def create(
     url: str,
 ) -> tuple[int, models.ProductImage | None]:
     """
-    Upload image, create product image and persist to database
+    Upload image, and persist product image to database
     """
 
     # generate fingerprint and check if image exists
@@ -41,13 +42,23 @@ def create(
 
     client = services.imagek.client()
 
-    # upload image
+    # upload image url or file
+
+    _host, _dir, path = services.files.file_uri_parse(source_uri=url)
+
+    if path:
+        # read file
+        url_file = open(path, "rb")
+    else:
+        # use url
+        url_file = url
 
     image_key = secrets.token_hex(3)
+    image_name = f"product-{product.key}-{image_key}"
 
     result = client.upload(
-        file=url,
-        file_name=f"product-{product.key}-{image_key}",
+        file=url_file,
+        file_name=image_name,
         options=options
     )
 
