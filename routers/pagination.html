@@ -1,0 +1,34 @@
+<div class="w-1/12"></div>
+<div class="w-10/12">
+    <nav class="flex items-center justify-between gap-x-1" aria-label="Pagination">
+        <button type="button"
+            class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-1.5 text-xs rounded-lg font-bold text-blue-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
+            aria-label="Previous">
+            {% if page_prev %}
+            <a href="{{ page_prev }}" class="">
+                <svg aria-hidden="true" class="hidden shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+                <span>previous</span>
+            </a>
+            {% endif %}
+        </button>
+
+        <button type="button"
+            class="min-h-9.5 min-w-9.5 py-2 px-2.5 inline-flex justify-center items-center gap-x-1.5 text-xs rounded-lg font-bold text-blue-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
+            aria-label="Next">
+            {% if page_next %}
+            <a href="{{ page_next }}" class="">
+                <span>next</span>
+                <svg aria-hidden="true" class="hidden shrink-0 size-3.5" xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"></path>
+                </svg>
+            </a>
+            {% endif %}
+        </button>
+    </nav>
+</div>

@@ -6,6 +6,7 @@ import sqlmodel
 import context
 import log
 import main_shared
+import routers.utils
 import services.products
 import services.users
 
@@ -26,7 +27,7 @@ def products_list(
     request: fastapi.Request,
     query: str="",
     offset: int=0,
-    limit: int=50,
+    limit: int=20,
     user_id: int = fastapi.Depends(main_shared.get_user_id),
     db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
 ):
@@ -47,6 +48,7 @@ def products_list(
             scope="",
         )
         products_list = list_result.objects
+        total_count = list_result.total
 
         query_code = 0
         query_result = f"query '{query}' returned {list_result.count} results"
@@ -60,6 +62,13 @@ def products_list(
 
         logger.error(f"{context.rid_get()} products query '{query}' exception '{e}'")
 
+    page_prev, page_next = routers.utils.page_links(
+        path=request.url.path,
+        params=request.query_params,
+        limit=limit,
+        total=total_count
+    )
+
     if "HX-Request" in request.headers:
         template = "products/list_table.html"
     else:
@@ -71,6 +80,8 @@ def products_list(
             template,
             {
                 "app_name": "Products",
+                "page_next": page_next,
+                "page_prev": page_prev,
                 "products_list": products_list,
                 "query": query,
                 "query_code": query_code,

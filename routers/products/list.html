@@ -26,9 +26,12 @@
     </div>
 </div>
 
-<div class="flex flex-col mx-auto mt-0 mb-20 w-full" id="products-table">
+<div class="flex flex-col mx-auto mt-0 w-full" id="products-table">
     {% include "products/list_table.html" %}
 </div>
 
+<div class="flex flex-row mt-10 mb-20">
+    {% include "pagination.html" %}
+</div>
 
 {% endblock %}

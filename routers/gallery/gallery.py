@@ -7,6 +7,7 @@ import context
 import log
 import main_shared
 import models
+import routers.utils
 import services.products
 import services.products.images
 import services.users
@@ -68,6 +69,13 @@ def gallery_list(
 
     products_count = len(products_list)
 
+    page_prev, page_next = routers.utils.page_links(
+        path=request.url.path,
+        params=request.query_params,
+        limit=limit,
+        total=total_count
+    )
+
     if products_count == 1:
         masonry_columns = "columns-1"
         masonry_width = "w-4/12"
@@ -111,8 +119,8 @@ def gallery_list(
                 "images_map": images_map,
                 "masonry_columns": masonry_columns,
                 "masonry_width": masonry_width,
-                "page_limit": limit,
-                "page_offset": offset,
+                "page_next": page_next,
+                "page_prev": page_prev,
                 "products_list": products_list,
                 "products_count": products_count,
                 "query": query,

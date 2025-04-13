@@ -31,11 +31,11 @@
 
 <script>
     // listen on parent element since child elements are replaced on update
-    const parent = document.getElementById("product-data")
+    const data_container = document.getElementById("product-data")
 
-    parent.addEventListener("keyup", (event) => {
-        document.getElementById("product-status").classList.add("text-amber-400")
-        document.getElementById("product-status").innerText = "changes detected, not saved"
+    data_container.addEventListener("keyup", (event) => {
+        document.getElementById("product-status").classList.add("text-sky-500")
+        document.getElementById("product-status").innerText = "changes detected"
     })
 </script>
 

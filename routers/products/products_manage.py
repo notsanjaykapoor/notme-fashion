@@ -343,11 +343,12 @@ def products_publish(
         return fastapi.responses.RedirectResponse(redirect_path)
 
 
-@app.get("/products/{product_id}/update", response_class=fastapi.responses.HTMLResponse)
+@app.get("/products/{product_id}/update", response_class=fastapi.responses.PlainTextResponse)
 def products_update(
     request: fastapi.Request,
     product_id: int,
     brands: str = "",
+    categories: str = "",
     grailed_id: int = 0,
     name: str = "",
     color: str = "",
@@ -355,6 +356,7 @@ def products_update(
     model: str = "",
     season: str = "",
     size: str = "",
+    tags: str = "",
     user_id: int = fastapi.Depends(main_shared.get_user_id),
     db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
 ):
@@ -365,6 +367,8 @@ def products_update(
 
     logger.info(f"{context.rid_get()} product {product_id} update try")
 
+    changes_list = []
+
     try:
         product = services.products.get_by_id(
             db_session=db_session,
@@ -374,12 +378,25 @@ def products_update(
         if brands:
             brands_list = [s.strip().lower() for s in brands.split(",") if s]
             product.brands = brands_list
+            changes_list.append("brand")
+
+        if categories:
+            cats_list = sorted([s.strip().lower() for s in categories.split(",") if s])
+            product.categories = cats_list
+            changes_list.append("categories")
 
         if grailed_id:
             product.grailed_id = grailed_id
+            changes_list.append("grailed id")
 
         if name:
             product.name = name
+            changes_list.append("name")
+
+        if tags:
+            tags_list = sorted([s.strip().lower() for s in tags.split(",") if s])
+            product.tags = tags_list
+            changes_list.append("tags")
 
         # data attributes
 
@@ -389,54 +406,41 @@ def products_update(
             data_mod["color"] = color.lower()
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
+            changes_list.append("color")
 
         if material:
             data_mod["material"] = material.lower()
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
+            changes_list.append("material")
 
         if model:
             data_mod["model"] = model.lower()
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
+            changes_list.append("model")
 
         if season:
             data_mod["season"] = season.lower()
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
+            changes_list.append("season")
 
         if size:
             data_mod["size"] = size.lower()
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
+            changes_list.append("size")
 
         db_session.add(product)
         db_session.commit()
 
-        status_message = "changes saved"
+        status_message = ", ".join(changes_list) 
+        status_message = f"{status_message} updated"
 
         logger.info(f"{context.rid_get()} product {product_id} update ok")
     except Exception as e:
         status_message = str(e)
         logger.error(f"{context.rid_get()} product {product_id} update exception '{e}'")
 
-    if "HX-Request" in request.headers:
-        template = "products/edit_data.html"
-    else:
-        template = ""
-
-    try:
-        response = templates.TemplateResponse(
-            request,
-            template,
-            {
-                "product": product,
-                "status_message": status_message,
-                "user": user,
-            }
-        )
-    except Exception as e:
-        logger.error(f"{context.rid_get()} product {product_id} update render exception '{e}'")
-        return templates.TemplateResponse(request, "500.html", {})
-
-    return response
+    return status_message
