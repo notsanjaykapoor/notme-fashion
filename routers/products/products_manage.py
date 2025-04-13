@@ -44,8 +44,9 @@ def products_create(
     logger.info(f"{context.rid_get()} product create '{name}' try")
 
     try:
-        if name.startswith("grailed:"):
-            _, grailed_id = name.split(":")
+        # check if name is a grailed url
+        if grailed_url := services.grailed.listing_url_match(url=name):
+            grailed_id = grailed_url.id
 
             # check if product exists
 
@@ -64,7 +65,7 @@ def products_create(
             if code not in [0, 409]:
                 raise Exception(f"download error {code}")
 
-            parse_result = services.grailed.parse(html_path=html_path)
+            parse_result = services.grailed.parse_html(html_path=html_path)
 
             if parse_result.code != 0:
                 raise Exception(f"parse error {parse_result.code}")

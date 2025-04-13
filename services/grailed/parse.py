@@ -11,7 +11,7 @@ class Struct:
     errors: list[str]
 
 
-def parse(html_path: str) -> Struct:
+def parse_html(html_path: str) -> Struct:
     """
     """
     struct = Struct(
