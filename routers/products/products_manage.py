@@ -33,7 +33,7 @@ app = fastapi.APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@app.get("/products/create", response_class=fastapi.responses.HTMLResponse)
+@app.get("/products/create", response_class=fastapi.responses.HTMLResponse | fastapi.responses.PlainTextResponse)
 def products_create(
     request: fastapi.Request,
     name: str,
@@ -50,11 +50,14 @@ def products_create(
 
     logger.info(f"{context.rid_get()} product create '{name}' try")
 
-    redirect_path = ""
-
     try:
         # check if name is a grailed url
         if grailed_url := services.grailed.listing_url_match(url=name):
+            # check if user has linked their grailed profile
+
+            if not user.grailed_handle:
+                raise Exception(f"grailed profile is not linked")
+
             grailed_id = grailed_url.id
 
             # check if product exists
@@ -73,11 +76,13 @@ def products_create(
             code, html_path = services.grailed.download(grailed_id=grailed_id)
 
             if code not in [0, 409]:
+                redirect_path = f"/products"
                 raise Exception(f"download error {code}")
 
             parse_result = services.grailed.parse_html(html_path=html_path)
 
             if parse_result.code != 0:
+                redirect_path = f"/products"
                 raise Exception(f"parse error {parse_result.code}")
 
             name = parse_result.name
@@ -100,7 +105,7 @@ def products_create(
         for image_url in image_urls:
             image_url = re.sub(r"\?.*", "", image_url)
 
-            code, _image = services.products.images.create(
+            _code, _image = services.products.images.create(
                 db_session=db_session,
                 product=product,
                 folder="/products",
@@ -115,9 +120,8 @@ def products_create(
         redirect_path = f"/products/{product.id}/edit"
         logger.info(f"{context.rid_get()} product create '{name}' ok - product {product.id}")
     except Exception as e:
-        if not redirect_path:
-            redirect_path = f"/products"
         logger.error(f"{context.rid_get()} product create exception '{e}'")
+        return fastapi.responses.PlainTextResponse(str(e))
 
     if "HX-Request" in request.headers:
         response = templates.TemplateResponse(request, "201.html")
@@ -159,6 +163,12 @@ def products_image_add(
         if code != 0:
             raise Exception(f"image create error {code}")
 
+        images_error = ""
+        logger.info(f"{context.rid_get()} product {product_id} image '{image_url}' add ok")
+    except Exception as e:
+        images_error = str(e)
+        logger.error(f"{context.rid_get()} product {product_id} image add exception '{e}'")
+    finally:
         # sync image metadata
         services.products.sync_images(
             db_session=db_session,
@@ -170,16 +180,13 @@ def products_image_add(
             query=f"product_id:{product.id}",
         )
         images_list = list_result.objects
-        images_count = len(images_list)
 
         thumbnails_map = {
             image.id : services.products.images.transform(product=product, image=image, transform="tr:w-30") for image in images_list
         }
-
-        logger.info(f"{context.rid_get()} product {product_id} image '{image_url}' add ok")
-    except Exception as e:
-        logger.error(f"{context.rid_get()} product {product_id} image add exception '{e}'")
         
+
+    images_count = len(images_list)
 
     if "HX-Request" in request.headers:
         template = "products/edit_images.html"
@@ -193,6 +200,7 @@ def products_image_add(
             {
                 "app_name": "Product Edit",
                 "images_count": images_count,
+                "images_error": images_error,
                 "images_list": images_list,
                 "product": product,
                 "thumbnails_map": thumbnails_map,
@@ -477,36 +485,36 @@ def products_update(
         # data attributes
 
         data_mod = product.data
+        data_changes = 0
 
         if color:
             data_mod["color"] = color.lower()
-            product.data = data_mod
-            sqlalchemy.orm.attributes.flag_modified(product, "data")
+            data_changes += 1
             changes_list.append("color")
 
         if material:
             data_mod["material"] = material.lower()
-            product.data = data_mod
-            sqlalchemy.orm.attributes.flag_modified(product, "data")
+            data_changes += 1
             changes_list.append("material")
 
         if model:
             data_mod["model"] = model.lower()
-            product.data = data_mod
-            sqlalchemy.orm.attributes.flag_modified(product, "data")
+            data_changes += 1
             changes_list.append("model")
 
         if season:
             data_mod["season"] = season.lower()
-            product.data = data_mod
-            sqlalchemy.orm.attributes.flag_modified(product, "data")
+            data_changes += 1
             changes_list.append("season")
 
         if size:
             data_mod["size"] = size.lower()
+            data_changes += 1
+            changes_list.append("size")
+
+        if data_changes > 0:
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
-            changes_list.append("size")
 
         db_session.add(product)
         db_session.commit()
@@ -519,4 +527,4 @@ def products_update(
         status_message = str(e)
         logger.error(f"{context.rid_get()} product {product_id} update exception '{e}'")
 
-    return status_message
+    return fastapi.responses.PlainTextResponse(status_message)

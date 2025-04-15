@@ -1,6 +1,6 @@
 <div class="flex flex-row mt-5">
     <div class="w-1/12"></div>
-    <div class="w-10/12">
+    <div class="w-4/12">
         {% if query_code == 0 %}
         <p class="text-xs font-bold text-black-700">
             {{query_result}}
@@ -11,6 +11,12 @@
         </p>
         {% endif %}
     </div>
+    <div class="w-2/12"></div>
+    <div class="w-4/12 font-normal text-xs">
+        <p class="text-xs text-red-700 font-bold" id="product-create-status">
+
+        </p>
+    </div>
 </div>
 
 <div class="flex flex-row mt-10">
@@ -19,7 +25,7 @@
         <table class="w-full">
             <thead class="font-normal text-center text-xs leading-6 text-zinc-800">
                 <tr>
-                    <th class="p-4">name</th>
+                    <th class="p-4">brand / name</th>
                     <th class="p-4">categories</th>
                     <th class="p-4">tags</th>
                     <th class="p-4">color</th>
@@ -34,11 +40,11 @@
                 {% for product in products_list %}
                 <tr class="group hover:bg-zinc-50 odd:bg-white even:bg-slate-50 text-center text-xs/6">
                     <td class="p-4 font-normal">
+                        {{ product.brands_string }}
+                        <br />
                         <a class="font-bold text-blue-700" href="/products/{{product.id}}">
                             {{ product.name }}
                         </a>
-                        <br />
-                        {{ product.brands_string }}
                     </td>
                     <td class="p-4 font-normal">{{ product.categories_string }}</td>
                     <td class="p-4 font-normal">{{ product.tags_string }}</td>
@@ -71,4 +77,8 @@
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="flex flex-row mt-10 mb-20">
+    {% include "pagination.html" %}
 </div>

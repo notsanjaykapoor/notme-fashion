@@ -48,14 +48,20 @@ def gallery_list(
             scope="state:active",
         )
         products_list = list_result.objects
+        products_count = len(products_list)
         total_count = list_result.total
+        time_msec = list_result.msec
 
         images_map = {
             product.id : services.products.images.transform(product=product, transform="tr:w-300") for product in products_list
         }
 
         query_code = 0
-        query_result = f"query '{query}' returned {list_result.count} results"
+
+        if total_count <= limit:
+            query_result = f"query '{query}' returned {total_count} results in {time_msec} msec"
+        else:
+            query_result = f"query '{query}' returned {offset+1} - {offset+products_count} of {total_count} results in {time_msec} msec"
 
         logger.info(f"{context.rid_get()} gallery query '{query}' ok")
     except Exception as e:
@@ -77,11 +83,11 @@ def gallery_list(
     )
 
     if products_count == 1:
-        masonry_columns = "columns-1"
-        masonry_width = "w-4/12"
+        masonry_columns = "columns-3"
+        masonry_width = "w-10/12"
     elif products_count == 2:
-        masonry_columns = "columns-2"
-        masonry_width = "w-8/12"
+        masonry_columns = "columns-3"
+        masonry_width = "w-10/12"
     else:
         masonry_columns = "columns-3"
         masonry_width = "w-10/12"

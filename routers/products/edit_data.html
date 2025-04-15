@@ -1,4 +1,4 @@
-<div class="flex flex-row mt-20">
+<div class="flex flex-row mt-0">
     <div class="w-1/12"></div>
     <div class="w-10/12 border-b-2 border-slate-100 text-zinc-800 pb-5">
         <p class="font-semibold text-xs text-black">Product Data</p>
@@ -15,7 +15,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="name" value="{{product.name}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -30,7 +30,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="brands" value="{{product.brands_string}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -45,7 +45,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="categories" value="{{product.categories_string}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -60,7 +60,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="tags" value="{{product.tags_string}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -75,7 +75,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="color" value="{{product.color}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -91,7 +91,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="material" value="{{product.material}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -106,7 +106,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="size" value="{{product.size}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -121,7 +121,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="model" value="{{product.model}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -136,7 +136,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="season" value="{{product.season}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -151,7 +151,7 @@
     <div class="w-4/12 text-xs">
         <input type="search" name="grailed_id" value="{{product.grailed_id}}" autocomplete="off"
             hx-get="/products/{{product.id}}/update" hx-target="#product-status"
-            hx-trigger="input changed delay:2000ms, search"
+            hx-trigger="input changed delay:1000ms, search"
             class="product-field search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
@@ -164,8 +164,8 @@
         </label>
     </div>
     <div class="w-4/12 text-xs">
-        <input type="search" name="state" value="{{product.state}}" readonly autocomplete="off"
-            class="search-primary text-zinc-400 px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+        <input type="search" name="state" value="{{product.state}}" disabled readonly autocomplete="off"
+            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
     <div class="w-1/12 text-xs flex justify-center items-center mt-2">
         {% if product.state == "draft" %}

@@ -48,10 +48,16 @@ def products_list(
             scope="",
         )
         products_list = list_result.objects
+        products_count = len(products_list)
         total_count = list_result.total
+        time_msec = list_result.msec
 
         query_code = 0
-        query_result = f"query '{query}' returned {list_result.count} results"
+
+        if total_count <= limit:
+            query_result = f"query '{query}' returned {total_count} results in {time_msec} msec"
+        else:
+            query_result = f"query '{query}' returned {offset+1} - {offset+products_count} of {total_count} results in {time_msec} msec"
 
         logger.info(f"{context.rid_get()} products query '{query}' ok")
     except Exception as e:
@@ -91,7 +97,7 @@ def products_list(
         )
 
         if "HX-Request" in request.headers:
-            response.headers["HX-Push-Url"] = f"/gallery?query={query}"
+            response.headers["HX-Push-Url"] = f"/products?query={query}"
     except Exception as e:
         logger.error(f"{context.rid_get()} products query '{query}' render exception '{e}'")
         return templates.TemplateResponse(request, "500.html", {})

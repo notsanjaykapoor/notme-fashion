@@ -33,17 +33,26 @@
         <div class="{{masonry_columns}} gap-20">
             {% for product in products_list %}
             <div class="flex flex-col mb-10">
-                <a class="mb-5" href="/products/{{product.id}}">
-                    <img class="w-full" src="{{ images_map.get(product.id) }}"></img>
-                </a>
-                <p class="text-xs font-normal text-zinc-400">
-                    {{ product.name }}
-                    <span class="float-right mr-0">
-                        {{ product.image_count }}
-                    </span>
-                </p>
+                <div class="break-inside-avoid">
+                    <a href="/products/{{product.id}}">
+                        <img class="w-full" src="{{ images_map.get(product.id) }}"></img>
+                    </a>
+                    <p class="text-xs/6 font-normal mt-2 text-zinc-400">
+                        {{ product.brands_string }}
+                        <span class="float-right mr-0">
+                            {{ product.image_count }}
+                        </span>
+                    </p>
+                    <p class="text-xs/6 font-normal text-zinc-400">
+                        {{ product.name }}
+                    </p>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
+</div>
+
+<div class="flex flex-row mt-20 mb-20">
+    {% include "pagination.html" %}
 </div>

@@ -20,18 +20,14 @@
     </div>
     <div class="w-2/12"></div>
     <div class="w-4/12 font-normal text-xs">
-        <input type="search" name="name" value="" placeholder="add product" autocomplete="off" hx-get="/products/create"
-            hx-target="#products-table" hx-trigger="search"
-            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+        <input type="search" name="name" value="" placeholder="add product by name or url" autocomplete="off"
+            hx-get="/products/create" hx-target="#product-create-status" hx-trigger="search"
+            class="search-primary text-xs/6 px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
     </div>
 </div>
 
 <div class="flex flex-col mx-auto mt-0 w-full" id="products-table">
     {% include "products/list_table.html" %}
-</div>
-
-<div class="flex flex-row mt-10 mb-20">
-    {% include "pagination.html" %}
 </div>
 
 {% endblock %}
