@@ -22,6 +22,8 @@ import routers.products.products_list
 import routers.products.products_manage
 import routers.products.products_show
 import routers.site.site
+import routers.users.users_profile
+import routers.users.users_link
 import services.database
 import services.users
 
@@ -56,6 +58,8 @@ app.include_router(routers.products.products_list.app)
 app.include_router(routers.products.products_manage.app)
 app.include_router(routers.products.products_show.app)
 app.include_router(routers.site.site.app)
+app.include_router(routers.users.users_profile.app)
+app.include_router(routers.users.users_link.app)
 
 # mount traditional static directory
 app.mount("/static", fastapi.staticfiles.StaticFiles(directory="static"), name="static")

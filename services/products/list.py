@@ -1,5 +1,6 @@
 import dataclasses
 import re
+import time
 
 import sqlalchemy
 import sqlmodel
@@ -16,6 +17,7 @@ class Struct:
     tags: list[str]
     count: int
     total: int
+    msec: int
     errors: list[str]
 
 
@@ -32,6 +34,7 @@ def list(
         tags=[],
         count=0,
         total=0,
+        msec=0,
         errors=[],
     )
 
@@ -48,10 +51,18 @@ def list(
 
     struct_tokens = services.mql.parse(query_normalized)
 
+    t_start_unix = time.time()
+
     for token in struct_tokens.tokens:
         value = token["value"]
 
-        if token["field"] in ["category", "categories"]:
+        if token["field"] in ["brand", "brands"]:
+            values = [s.strip() for s in value.lower().split(",")]
+            if len(values) == 1:
+                dataset = dataset.where(model.name.match(values[0]))
+            else:
+                dataset = dataset.where(model.brands.contains(values))
+        elif token["field"] in ["category", "categories"]:
             values = [s.strip() for s in value.lower().split(",")]
             dataset = dataset.where(model.categories.contains(values))
             struct.categories = values
@@ -89,5 +100,7 @@ def list(
     struct.total = db_session.scalar(
         sqlmodel.select(sqlalchemy.func.count("*")).select_from(dataset.subquery())
     )
+
+    struct.msec = round((time.time() - t_start_unix) * 1000, 2)
 
     return struct

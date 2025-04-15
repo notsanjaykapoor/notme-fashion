@@ -35,20 +35,6 @@ def test_products_create(db_session: sqlmodel.Session, user_1: models.User):
     assert product_1.user_id == user_1.id
 
     with pytest.raises(sqlalchemy.exc.IntegrityError):
-        # name should be unique
-        services.products.create(
-            db_session=db_session,
-            key=ulid.new().str,
-            name="Product 1",
-            source_id=ulid.new().str,
-            source_name=models.product.SOURCE_NOTME,
-            state=models.product.STATE_ACTIVE,
-            user_id=user_1.id,
-        )
-
-    db_session.rollback()
-
-    with pytest.raises(sqlalchemy.exc.IntegrityError):
         # source should be unique
         services.products.create(
             db_session=db_session,

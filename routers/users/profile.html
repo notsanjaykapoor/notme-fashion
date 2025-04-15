@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col mx-auto mt-10">
+    <h3 class="mx-auto font-bold">
+        {{ app_name }}
+    </h3>
+    <div class="mt-2 mx-auto text-xs text-zinc-400">
+        @{{ app_version }}
+    </div>
+</div>
+
+<div class="flex flex-row mt-20">
+    <div class="w-1/12"></div>
+    <div class="w-10/12 border-b-2 border-slate-100 text-zinc-800 pb-5">
+        <p class="font-semibold text-xs text-black">Linked Profiles</p>
+    </div>
+</div>
+
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            grailed
+        </label>
+    </div>
+    {% if user_profile.grailed_handle %}
+    <div class="w-1/12 flex items-center text-xs">
+        <a href="{{user.grailed_profile_url}}" class="font-bold text-blue-700 ml-0" target="_blank">
+            {{user.grailed_profile_url}}
+        </a>
+    </div>
+    {% else %}
+    <div class="w-1/12 flex items-center text-xs">
+        <a href="/users/{{user_profile.id}}/link/grailed" class="font-bold text-red-700" title="link grailed profile">
+            link
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-1/12 flex items-center text-xs">
+        <label class="text-zinc-400">
+            instagram
+        </label>
+    </div>
+    {% if user_profile.ig_handle %}
+    <div class="w-1/12 flex items-center text-xs">
+        <a href="{{user.ig_profile_url}}" class="font-bold text-blue-700 ml-0" target="_blank">
+            {{user_profile.ig_profile_url}}
+        </a>
+    </div>
+    {% else %}
+    <div class="w-1/12 flex items-center text-xs">
+        <a href="/users/{{user_profile.id}}/link/instagram" class="font-bold text-red-700"
+            title="link instagram profile">
+            link
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

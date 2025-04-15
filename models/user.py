@@ -9,6 +9,7 @@ IDP_GOOGLE = "google"
 IDP_PASS = "pass"
 
 STATE_ACTIVE = "active"
+STATE_VERIFIED = "verified"
 
 TZ_DEFAULT = "US/Chicago"
 
@@ -24,7 +25,8 @@ class User(sqlmodel.SQLModel, table=True):
         default_factory=lambda: datetime.datetime.now(datetime.UTC),
     )
     data: dict = sqlmodel.Field(
-        default_factory=dict, sa_column=sqlmodel.Column(sqlmodel.JSON)
+        sa_column=sqlmodel.Column(sqlmodel.JSON),
+        default_factory=dict,
     )
     email: str = sqlmodel.Field(index=True, nullable=False)
     grailed_handle: str = sqlmodel.Field(index=True, nullable=True)
@@ -42,3 +44,25 @@ class User(sqlmodel.SQLModel, table=True):
         ),
         default_factory=lambda: datetime.datetime.now(datetime.UTC),
     )
+
+    @property
+    def ig_key(self) -> str:
+        return self.data.get("ig_key", "")
+
+    @property
+    def ig_profile_url(self) -> str:
+        if not self.ig_handle:
+            return ""
+
+        return f"https://www.instagram.com/{self.ig_handle}"
+
+    @property
+    def grailed_key(self) -> str:
+        return self.data.get("grailed_key", "")
+
+    @property
+    def grailed_profile_url(self) -> str:
+        if not self.grailed_handle:
+            return ""
+
+        return f"https://www.grailed.com/{self.grailed_handle}"

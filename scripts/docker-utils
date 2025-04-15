@@ -55,9 +55,9 @@ def build(dockerfile: str, sha: str, no_push: bool, env: str):
 
     _print_ok("ok")
 
-    time_mins = round((time.time() - time_start_unix), 1)
+    time_secs = round((time.time() - time_start_unix), 1)
 
-    _print_ok(f"build completed in {time_mins} secs")
+    _print_ok(f"build completed in {time_secs} secs")
 
 
 def _docker_build(dockerfile: str, version: str, repo: str, push: bool) -> int:

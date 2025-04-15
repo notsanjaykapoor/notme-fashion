@@ -1,0 +1,56 @@
+import models
+import services.mql
+
+
+def test_mql_parse():
+    # should parse simple query
+    parse_result = services.mql.parse(query="name:foo")
+
+    assert parse_result.code == 0
+    assert len(parse_result.tokens) == 1
+    assert parse_result.tokens[0] == {
+        "field": "name",
+        "value": "foo",
+    }
+
+    # should parse query with field value with space in value
+    parse_result = services.mql.parse(query="name:foo bar")
+
+    assert parse_result.code == 0
+    assert len(parse_result.tokens) == 1
+    assert parse_result.tokens[0] == {
+        "field": "name",
+        "value": "foo bar",
+    }
+
+    # should parse query with field value with extra space
+    parse_result = services.mql.parse(query="name: foo")
+
+    assert parse_result.code == 0
+    assert len(parse_result.tokens) == 1
+    assert parse_result.tokens[0] == {
+        "field": "name",
+        "value": "foo",
+    }
+
+    # should parse query with multiple fields
+    parse_result = services.mql.parse(query="name:foo key:val with space")
+
+    assert parse_result.code == 0
+    assert len(parse_result.tokens) == 2
+    assert parse_result.tokens[0] == {
+        "field": "name",
+        "value": "foo",
+    }
+    assert parse_result.tokens[1] == {
+        "field": "key",
+        "value": "val with space",
+    }
+
+    # should parse empty query
+    parse_result = services.mql.parse(query="")
+
+    assert parse_result.code == 0
+    assert len(parse_result.tokens) == 0
+
+

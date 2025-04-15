@@ -14,7 +14,6 @@ STATE_DRAFT = "draft"
 class Product(sqlmodel.SQLModel, table=True):
     __tablename__ = "products"
     __table_args__ = (
-        sqlalchemy.UniqueConstraint("name", name="_products_name"),
         sqlalchemy.UniqueConstraint("source_id", "source_name", name="_source_id_name"),
     )
 
