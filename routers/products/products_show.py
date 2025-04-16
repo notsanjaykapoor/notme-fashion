@@ -1,6 +1,7 @@
 import fastapi
 import fastapi.templating
 import sqlmodel
+import urllib.parse
 
 import context
 import log
@@ -13,13 +14,13 @@ logger = log.init("app")
 
 # initialize templates dir
 templates = fastapi.templating.Jinja2Templates(directory="routers", context_processors=[main_shared.jinja_context])
+templates.env.filters["quote_plus"] = lambda s: urllib.parse.quote_plus(str(s)) if s else ""
 
 app = fastapi.APIRouter(
     tags=["app"],
     dependencies=[fastapi.Depends(main_shared.get_db)],
     responses={404: {"description": "Not found"}},
 )
-
 
 @app.get("/products/{product_id}", response_class=fastapi.responses.HTMLResponse)
 def products_show(

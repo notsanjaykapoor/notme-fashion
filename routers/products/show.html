@@ -33,7 +33,14 @@
     <div class="w-4/12 text-xs/6">
         <ul>
             <li class="font-bold">{{ product.name }}</li>
-            <li>designer: {{ product.brands_string }}</li>
+            <li>
+                designer:
+                {% if product.brands_string %}
+                <a class="font-bold text-blue-700" href="/gallery?query=brand:{{product.brands_string | quote_plus}}">{{
+                    product.brands_string }}
+                </a>
+                {% endif %}
+            </li>
             <li>color: {{ product.color }}</li>
             <li>material: {{ product.material }}</li>
             <li>model: {{ product.model }}</li>

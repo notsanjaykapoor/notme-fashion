@@ -133,8 +133,7 @@ def users_verify(
             print(verify_result) # xxx
 
             if verify_result.code != 0:
-                verify_message = ", ".join(verify_result.errors)
-                return verify_message
+                raise Exception(", ".join(verify_result.errors))
 
             # update user grailed handle
             user_profile.grailed_handle = verify_result.listing.username
@@ -142,8 +141,7 @@ def users_verify(
             verify_result = services.ig.verify(url=url, key=key_value)
 
             if verify_result.code != 0:
-                verify_message = ", ".join(verify_result.errors)
-                return verify_message
+                raise Exception(", ".join(verify_result.errors))
 
             # update user ig handle
             user_profile.ig_handle = verify_result.post.username
@@ -154,10 +152,18 @@ def users_verify(
         db_session.add(user_profile)
         db_session.commit(user_profile)
 
+        verify_code = 0
         verify_message = ""
         logger.info(f"{context.rid_get()} user {user_profile.id} verify '{link_name}' ok")
     except Exception as e:
+        verify_code = 400
         verify_message = str(e)
         logger.error(f"{context.rid_get()} user {user_profile.id} verify '{link_name}' exception '{e}'")
 
-    return fastapi.responses.PlainTextResponse(verify_message)
+    response = fastapi.responses.PlainTextResponse(verify_message)
+
+    if verify_code == 0:
+        # htmx redirect
+        response.headers["HX-Redirect"] = f"/users/{user_profile.id}/profile"
+
+    return response

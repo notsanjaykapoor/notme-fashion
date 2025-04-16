@@ -36,7 +36,7 @@ def gallery_list(
 ):
     user = services.users.get_by_id(db_session=db_session, id=user_id)
 
-    logger.info(f"{context.rid_get()} gallery name '{name}' query '{query}' try")
+    logger.info(f"{context.rid_get()} gallery query '{query}' try")
 
     try:
         list_result = services.products.list(

@@ -30,40 +30,52 @@ def cli():
 @click.option("--file-id", default="1rSHZMWA4AKoshCyMCo7gf7hxK_aonnESaGqWtUnwFmw", required=False, help="google file id")
 @click.option("--file-output", default="products.csv", required=False, help="output file name")
 @click.option("--user", "user_email", default="notsanjaykapoor@gmail.com", required=False, help="user email")
-def csv(file_id: str, file_output: str, user_email: str):
+def csv_sheet(file_id: str, file_output: str, user_email: str):
     """
-    Ingest csv
+    Ingest csv from google sheet
     """
     _print_status(f"file '{file_id}' download '{file_output}' try")
 
-    response = subprocess.run(
-        f"wget --output-document={file_output} https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
-        shell=True,
-        capture_output=False,
-    )
+    if not os.path.exists(file_output):
+        response = subprocess.run(
+            f"wget --output-document={file_output} https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
+            shell=True,
+            capture_output=False,
+        )
 
-    if response.returncode != 0:
-        _print_error(f"wget error {response}")
-        exit(response.returncode)
+        if response.returncode != 0:
+            _print_error(f"wget error {response}")
+            exit(response.returncode)
 
     _print_ok(f"file download '{file_output}' completed")
 
     with open(file_output) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if not row.get("name"):
+            product_name = row.get("name", "").strip().lower()
+            image_urls = [s.strip() for s in row.get("images").split(",") if s.strip().startswith("https:")]
+
+            if not product_name or not image_urls:
                 continue
 
             print(row)
 
-            product_name = row.get("name").strip().lower()
-            grailed_id = int(row.get("grailed_id").strip() or 0)
+            grailed_id = int(row.get("grailed_id", "0").strip() or 0)
 
-            product_brands = [s.strip().lower() for s in row.get("brands").split(",") if s.strip()]
-            product_cats = [s.strip().lower() for s in row.get("category").split(",") if s.strip()]
-            product_tags = [s.strip().lower() for s in row.get("tags").split(",") if s.strip()]
+            product_brand_model = row.get("brand / model", "").strip().lower()
+            product_brand, product_model = [str(s).strip().lower() for s in product_brand_model.split("/", 1)]
 
-            product_state = models.product.STATE_ACTIVE
+            product_cats = [s.strip().lower() for s in row.get("category", "").split(",") if s.strip()]
+            product_tags = [s.strip().lower() for s in row.get("tags", "").split(",") if s.strip()]
+
+            product_color_size = row.get("color / size", "").strip().lower()
+            product_color, product_size = [str(s).strip().lower() for s in product_color_size.split("/", 1)]
+
+            product_material = row.get("material", "").strip().lower()
+            product_season = row.get("season", "").strip().lower()
+            product_stockist = row.get("stockist", "").strip().lower()
+
+            product_state = models.product.STATE_DRAFT
 
             with services.database.session.get() as db_session:
                 user = services.users.get_by_email(db_session=db_session, email=user_email)
@@ -74,21 +86,43 @@ def csv(file_id: str, file_output: str, user_email: str):
                         grailed_id=grailed_id,
                     )
                 else:
-                    product = services.products.get_by_name(
+                    product = None
+
+                    # find product using narrowing queries
+                    queries = [
+                        f"name:{product_name} brand:{product_brand}",
+                        f"name:{product_name} brand:{product_brand} color:{product_color}",
+                    ]
+
+                    find_result = services.products.find_by_queries(
                         db_session=db_session,
-                        name=product_name,
+                        queries=queries,
                     )
 
+                    if find_result.code == 422:
+                        # too many product matches were found
+                        _print_error(f"product query '{find_result.query}' found matches")
+                        continue
+
+                    if find_result.code == 0:
+                        # found a matching product
+                        product = find_result.objects[0]
+                        query = find_result.query
+
                 product_data = {
-                    "color": row.get("color", "").strip().lower(),
-                    "material": row.get("material", "").strip().lower(),
-                    "model": row.get("model", "").strip().lower(),
-                    "season": row.get("season", "").strip().lower(),
-                    "size": row.get("size", "").strip().lower(),
+                    "color": product_color,
+                    "material": product_material,
+                    "model": product_model,
+                    "season": product_season,
+                    "size": product_size,
+                    "stockist": product_stockist,
                 }
 
                 if product:
-                    _print_status(f"product {product.id} exists")
+                    # preserve product state
+                    product_state = product.state
+                    product_code = 200
+                    _print_status(f"product {product.id} exists - query '{query}'")
                 else:
                     product = services.products.create(
                         db_session=db_session,
@@ -100,30 +134,31 @@ def csv(file_id: str, file_output: str, user_email: str):
                         state=product_state,
                         user_id=user.id,
                     )
+                    product_code = 201
 
                     _print_ok(f"product {product.id} created")
 
-                # create product images
-                image_urls = [s.strip() for s in row.get("images").split(",") if s.strip().startswith("https:")]
+                # create product images iff its a new product
 
-                for image_url in image_urls:
-                    code, image = services.products.images.create(
-                        db_session=db_session,
-                        product=product,
-                        folder="/products",
-                        url=image_url,
-                    )
+                if product_code == 201:
+                    for image_url in image_urls:
+                        code, image = services.products.images.create(
+                            db_session=db_session,
+                            product=product,
+                            folder="/products",
+                            url=image_url,
+                        )
 
-                    if code == 409:
-                        _print_status(f"product {product.id} image {image.id} exists")
-                    else:
-                        _print_ok(f"product {product.id} image {image.id} created")
+                        if code == 409:
+                            _print_status(f"product {product.id} image {image.id} exists")
+                        else:
+                            _print_ok(f"product {product.id} image {image.id} created")
 
                 services.products.sync_meta(
                     db_session=db_session,
                     product=product,
                     data=product_data,
-                    brands=product_brands,
+                    brands=[product_brand],
                     categories=product_cats,
                     tags=product_tags,
                 )
@@ -227,7 +262,7 @@ def _print_status(s: str):
     print("\x1b[1;36m" + s + "\x1b[0m", flush=True)
 
 
-cli.add_command(csv)
+cli.add_command(csv_sheet)
 cli.add_command(grailed)
 
 if __name__ == "__main__":

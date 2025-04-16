@@ -13,7 +13,8 @@ import services.mql
 class Struct:
     code: int
     objects: list[models.Product]
-    cateories: list[str]
+    brands: list[str]
+    categories: list[str]
     tags: list[str]
     count: int
     total: int
@@ -30,7 +31,8 @@ def list(
     struct = Struct(
         code=0,
         objects=[],
-        cateories=[],
+        brands=[],
+        categories=[],
         tags=[],
         count=0,
         total=0,
@@ -58,10 +60,13 @@ def list(
 
         if token["field"] in ["brand", "brands"]:
             values = [s.strip() for s in value.lower().split(",")]
-            if len(values) == 1:
-                dataset = dataset.where(model.name.match(values[0]))
+            if len(values) == 0: # test
+                dataset = dataset.where(model.brands.match(values[0]))
             else:
                 dataset = dataset.where(model.brands.contains(values))
+            struct.brands = values
+        elif token["field"] == "color":
+            dataset = dataset.where(model.data["color"].as_string().like("%" + value + "%"))
         elif token["field"] in ["category", "categories"]:
             values = [s.strip() for s in value.lower().split(",")]
             dataset = dataset.where(model.categories.contains(values))
@@ -73,12 +78,16 @@ def list(
                 dataset = dataset.where(model.grailed_id == 0)
         elif token["field"] == "key":
             dataset = dataset.where(model.key == value)
+        elif token["field"] == "material":
+            dataset = dataset.where(model.data["material"].as_string().like("%" + value + "%"))
         elif token["field"] == "name":
             # always like query
             value_normal = re.sub(r"~", "", value).lower()
             dataset = dataset.where(
                 sqlalchemy.func.lower(model.name).like("%" + value_normal + "%")
             )
+        elif token["field"] == "season":
+            dataset = dataset.where(model.data["season"].as_string().like("%" + value + "%"))
         elif token["field"] in ["source", "source_name"]:
             dataset = dataset.where(model.source_name == value)
         elif token["field"] in ["state"]:
