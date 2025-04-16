@@ -10,7 +10,6 @@ sys.path.insert(1, os.path.join(sys.path[0], "../.."))
 
 import dot_init
 
-import bs4
 import click
 import ulid
 
@@ -21,13 +20,15 @@ import services.products
 import services.products.images
 import services.users
 
+DEFAULT_FILE_ID = "1D0EYwL8X2CygW8CsECfN8uv0HUjWsjzR3dco6v3OPUU"
+
 @click.group()
 def cli():
     pass
 
 
 @click.command()
-@click.option("--file-id", default="1rSHZMWA4AKoshCyMCo7gf7hxK_aonnESaGqWtUnwFmw", required=False, help="google file id")
+@click.option("--file-id", default=None, required=True, help="google file id")
 @click.option("--file-output", default="products.csv", required=False, help="output file name")
 @click.option("--user", "user_email", default="notsanjaykapoor@gmail.com", required=False, help="user email")
 def csv_sheet(file_id: str, file_output: str, user_email: str):
@@ -154,7 +155,7 @@ def csv_sheet(file_id: str, file_output: str, user_email: str):
                         else:
                             _print_ok(f"product {product.id} image {image.id} created")
 
-                services.products.sync_meta(
+                services.products.update(
                     db_session=db_session,
                     product=product,
                     data=product_data,

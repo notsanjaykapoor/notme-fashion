@@ -1,4 +1,5 @@
 import sqlalchemy.orm.attributes
+import sqlalchemy.sql
 import sqlmodel
 
 import models
@@ -31,34 +32,11 @@ def sync_images(db_session: sqlmodel.Session, product: models.Product) -> int:
 def sync_meta(
     db_session: sqlmodel.Session,
     product: models.Product,
-    data: dict,
-    brands: list[str]=[],
-    categories: list[str]=[],
-    tags: list[str]=[],
 ) -> int:
     """
-    Sync product metadata.
+    Sync product search_vector field which is derived from other product fields.
     """
-    if brands and product.brands != sorted(brands):
-        product.brands = sorted(brands)
-
-    if categories and product.categories != sorted(categories):
-        product.categories = sorted(categories)
-
-    if tags and product.tags != sorted(tags):
-        product.tags = sorted(tags)
-
-    data_mod = product.data
-    data_changes = 0
-
-    for key, value in data.items():
-        if key not in data_mod or data_mod.get(key) != value:
-            data_mod[key] = value
-            data_changes += 1
-
-    if data_changes > 0:
-        product.data = data_mod
-        sqlalchemy.orm.attributes.flag_modified(product, "data")
+    product.search_vector = sqlalchemy.sql.func.to_tsvector(product.search_text)
 
     db_session.add(product)
     db_session.commit()

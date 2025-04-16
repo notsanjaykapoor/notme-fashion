@@ -46,7 +46,7 @@ def list(
     query_normalized = query
 
     if query and ":" not in query:
-        query_normalized = f"name:{query}"
+        query_normalized = f"search:{query}"
 
     if scope:
         query_normalized = f"{query_normalized} {scope}".strip()
@@ -60,10 +60,7 @@ def list(
 
         if token["field"] in ["brand", "brands"]:
             values = [s.strip() for s in value.lower().split(",")]
-            if len(values) == 0: # test
-                dataset = dataset.where(model.brands.match(values[0]))
-            else:
-                dataset = dataset.where(model.brands.contains(values))
+            dataset = dataset.where(model.brands.contains(values))
             struct.brands = values
         elif token["field"] == "color":
             dataset = dataset.where(model.data["color"].as_string().like("%" + value + "%"))
@@ -76,6 +73,9 @@ def list(
                 dataset = dataset.where(model.grailed_id > 0)
             else:
                 dataset = dataset.where(model.grailed_id == 0)
+        elif token["field"] in ["id", "ids"]:
+            values = [int(s) for s in value.lower().split(",")]
+            dataset = dataset.where(model.id.in_(values))
         elif token["field"] == "key":
             dataset = dataset.where(model.key == value)
         elif token["field"] == "material":
@@ -86,6 +86,8 @@ def list(
             dataset = dataset.where(
                 sqlalchemy.func.lower(model.name).like("%" + value_normal + "%")
             )
+        elif token["field"] == "search":
+            dataset = dataset.where(model.search_vector.match(value))
         elif token["field"] == "season":
             dataset = dataset.where(model.data["season"].as_string().like("%" + value + "%"))
         elif token["field"] in ["source", "source_name"]:

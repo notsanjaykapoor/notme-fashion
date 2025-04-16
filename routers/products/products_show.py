@@ -33,9 +33,7 @@ def products_show(
 
     logger.info(f"{context.rid_get()} product {product_id} try")
 
-    referer_path = request.headers.get("referer", "")
-
-    if "edit" in referer_path:
+    if "edit" in (referer_path := request.headers.get("referer", "")):
         referer_path = "/gallery"
 
     try:

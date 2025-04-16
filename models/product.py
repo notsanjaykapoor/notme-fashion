@@ -1,6 +1,7 @@
 import datetime
 import typing
 
+import pydantic
 import sqlalchemy
 import sqlalchemy.dialects.postgresql
 import sqlmodel
@@ -10,12 +11,13 @@ SOURCE_NOTME = "notme"
 STATE_ACTIVE = "active"
 STATE_DRAFT = "draft"
 
-
 class Product(sqlmodel.SQLModel, table=True):
     __tablename__ = "products"
     __table_args__ = (
         sqlalchemy.UniqueConstraint("source_id", "source_name", name="_source_id_name"),
     )
+
+    model_config = pydantic.ConfigDict(arbitrary_types_allowed=True)
 
     id: typing.Optional[int] = sqlmodel.Field(default=None, primary_key=True)
 
@@ -45,6 +47,9 @@ class Product(sqlmodel.SQLModel, table=True):
     notes: str = sqlmodel.Field(
         default="",
         sa_column=sqlmodel.Column(sqlmodel.TEXT),
+    )
+    search_vector: typing.Any = sqlmodel.Field(
+        sa_column=sqlalchemy.Column(sqlalchemy.dialects.postgresql.TSVECTOR),
     )
     source_id: str = sqlmodel.Field(index=True, nullable=False)
     source_name: str = sqlmodel.Field(index=True, nullable=False)
@@ -90,6 +95,14 @@ class Product(sqlmodel.SQLModel, table=True):
     @property
     def model(self) -> str:
         return self.data.get("model", "")
+
+    @property
+    def search_text(self) -> str:
+        """
+        Generate search string used to create postgres tsvector field
+        """
+        search_fields = [self.name, self.brands_string, self.categories_string, self.tags_string, self.color, self.material, self.model, self.season]
+        return " ".join(s for s in search_fields if s)
 
     @property
     def season(self) -> str:

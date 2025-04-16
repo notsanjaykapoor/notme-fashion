@@ -1,5 +1,6 @@
 import typing
 
+import sqlalchemy.sql
 import sqlmodel
 
 import models
@@ -23,6 +24,7 @@ def create(
         grailed_id=grailed_id,
         key=key,
         name=name.strip(),
+        search_vector=sqlalchemy.sql.func.to_tsvector(name),
         source_id=source_id,
         source_name=source_name,
         state=state,

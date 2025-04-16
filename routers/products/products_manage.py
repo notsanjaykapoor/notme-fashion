@@ -117,6 +117,11 @@ def products_create(
             product=product,
         )
 
+        services.products.sync_meta(
+            db_session=db_session,
+            product=product,
+        )
+
         redirect_path = f"/products/{product.id}/edit"
         logger.info(f"{context.rid_get()} product create '{name}' ok - product {product.id}")
     except Exception as e:
@@ -515,6 +520,13 @@ def products_update(
         if data_changes > 0:
             product.data = data_mod
             sqlalchemy.orm.attributes.flag_modified(product, "data")
+
+        # sync metadata
+
+        services.products.sync_meta(
+            db_session=db_session,
+            product=product,
+        )
 
         db_session.add(product)
         db_session.commit()

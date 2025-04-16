@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], "../.."))
+
+import dot_init
+
+import click
+
+import models
+import services.database
+import services.products
+
+
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+@click.option("--query", default="", required=False, help="product query")
+def index(query: str):
+    """
+    Ingest csv from google sheet
+    """
+    _print_status(f"products index query '{query}' try")
+
+    indexed_count = 0
+
+    with services.database.session.get() as db_session:
+        list_result = services.products.list(
+            db_session=db_session,
+            query=query,
+            offset=0,
+            limit=100,
+        )
+
+        products = list_result.objects
+
+        for product in products:
+            services.products.update(
+                db_session=db_session,
+                product=product,
+                data={},
+            )
+            indexed_count += 1
+
+        
+
+    _print_status(f"products index query '{query}' ok - indexed {indexed_count}")
+
+
+def _print_error(s: str):
+    print("\x1b[1;31m" + s + "\x1b[0m", flush=True)
+
+
+def _print_ok(s: str):
+    print("\x1b[1;32m" + s + "\x1b[0m", flush=True)
+
+
+def _print_status(s: str):
+    print("\x1b[1;36m" + s + "\x1b[0m", flush=True)
+
+
+cli.add_command(index)
+
+if __name__ == "__main__":
+    index()
