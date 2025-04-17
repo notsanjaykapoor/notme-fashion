@@ -91,8 +91,10 @@ def csv_sheet(file_id: str, file_output: str, user_email: str):
 
                     # find product using narrowing queries
                     queries = [
-                        f"name:{product_name} brand:{product_brand}",
-                        f"name:{product_name} brand:{product_brand} color:{product_color}",
+                        f"search:{product_name} {product_brand}".strip(),
+                        f"search:{product_name} {product_brand} {product_color}".strip(),
+                        # f"name:{product_name} brand:{product_brand}",
+                        # f"name:{product_name} brand:{product_brand} color:{product_color}",
                     ]
 
                     find_result = services.products.find_by_queries(

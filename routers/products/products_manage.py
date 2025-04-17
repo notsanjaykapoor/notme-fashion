@@ -68,25 +68,25 @@ def products_create(
             )
 
             if product:
-                redirect_path = f"/products/{product.id}"
                 raise Exception(f"product {product.id} exists")
 
             # download and parse grailed listing
 
-            code, html_path = services.grailed.download(grailed_id=grailed_id)
+            code, html_path = services.grailed.download(grailed_id=grailed_id, overwrite=1)
 
             if code not in [0, 409]:
-                redirect_path = f"/products"
-                raise Exception(f"download error {code}")
+                raise Exception(f"listing download error {code}")
 
-            parse_result = services.grailed.parse_html(html_path=html_path)
+            grailed_listing = services.grailed.parse_html(html_path=html_path)
 
-            if parse_result.code != 0:
-                redirect_path = f"/products"
-                raise Exception(f"parse error {parse_result.code}")
+            if grailed_listing.code != 0:
+                raise Exception(f"listing parse error {grailed_listing.code}")
 
-            name = parse_result.name
-            image_urls = parse_result.image_urls[0:2]
+            if grailed_listing.username != user.grailed_handle:
+                raise Exception(f"listing owner does not match")
+
+            name = grailed_listing.title.lower()
+            image_urls = grailed_listing.image_urls[0:2]
         else:
             image_urls = []
             grailed_id = 0
@@ -122,11 +122,14 @@ def products_create(
             product=product,
         )
 
-        redirect_path = f"/products/{product.id}/edit"
         logger.info(f"{context.rid_get()} product create '{name}' ok - product {product.id}")
     except Exception as e:
         logger.error(f"{context.rid_get()} product create exception '{e}'")
         return fastapi.responses.PlainTextResponse(str(e))
+
+    # product create was successful
+
+    redirect_path = f"/products/{product.id}/edit"
 
     if "HX-Request" in request.headers:
         response = templates.TemplateResponse(request, "201.html")
@@ -136,8 +139,8 @@ def products_create(
         return fastapi.responses.RedirectResponse(redirect_path)
 
 
-@app.get("/products/{product_id}/add", response_class=fastapi.responses.HTMLResponse)
-def products_image_add(
+@app.get("/products/{product_id}/images/add", response_class=fastapi.responses.HTMLResponse)
+def products_images_add(
     request: fastapi.Request,
     product_id: int,
     image_url: str,
@@ -203,7 +206,6 @@ def products_image_add(
             request,
             template,
             {
-                "app_name": "Product Edit",
                 "images_count": images_count,
                 "images_error": images_error,
                 "images_list": images_list,
@@ -219,8 +221,8 @@ def products_image_add(
     return response
 
 
-@app.get("/products/{product_id}/delete", response_class=fastapi.responses.HTMLResponse)
-def products_image_delete(
+@app.get("/products/{product_id}/images/delete", response_class=fastapi.responses.HTMLResponse)
+def products_images_delete(
     request: fastapi.Request,
     product_id: int,
     image_id: int,
@@ -260,11 +262,81 @@ def products_image_delete(
             product=product,
         )
 
+        if product.image_count == 0 and product.state != models.product.STATE_DRAFT:
+            # product can not be active without images
+            product.state = models.product.STATE_DRAFT
+
+        db_session.add(product)
+        db_session.commit()
+
+        # refresh product after image update
+        product = services.products.get_by_id(db_session=db_session, id=product.id)
+
         logger.info(f"{context.rid_get()} product {product_id} image {image_id} delete ok")
     except Exception as e:
         logger.error(f"{context.rid_get()} product {product_id} image {image_id} delete exception '{e}'")
 
     return fastapi.responses.RedirectResponse(request.headers.get("referer"))
+
+
+@app.get("/products/{product_id}/links/add", response_class=fastapi.responses.HTMLResponse)
+def products_links_add(
+    request: fastapi.Request,
+    product_id: int,
+    link: str,
+    user_id: int = fastapi.Depends(main_shared.get_user_id),
+    db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
+):
+    if user_id == 0:
+        return fastapi.responses.RedirectResponse("/login")
+
+    user = services.users.get_by_id(db_session=db_session, id=user_id)
+
+    logger.info(f"{context.rid_get()} product {product_id} link '{link}' add try")
+
+    try:
+        product = services.products.get_by_id(
+            db_session=db_session,
+            id=product_id,
+        )
+
+        services.products.update(
+            db_session=db_session,
+            product=product,
+            data={},
+            links=product.links + [link]
+        )
+
+        db_session.add(product)
+        db_session.commit()
+
+        links_error = ""
+        logger.info(f"{context.rid_get()} product {product_id} link '{link}' add ok")
+    except Exception as e:
+        links_error = str(e)
+        logger.error(f"{context.rid_get()} product {product_id} link add exception '{e}'")
+
+    if "HX-Request" in request.headers:
+        template = "products/edit_links.html"
+    else:
+        template = ""
+ 
+    try:
+        response = templates.TemplateResponse(
+            request,
+            template,
+            {
+                "links_error": links_error,
+                "product": product,
+                "user": user,
+            }
+        )
+    except Exception as e:
+        logger.error(f"{context.rid_get()} product {product_id} link render exception '{e}'")
+        return templates.TemplateResponse(request, "500.html", {})
+
+    return response
+
 
 
 @app.get("/products/{product_id}/edit", response_class=fastapi.responses.HTMLResponse)
@@ -348,6 +420,9 @@ def products_publish(
             db_session=db_session,
             id=product_id,
         )
+
+        if product.publishable == 0:
+            raise ValueError("product not publishable")
 
         if product.state == models.product.STATE_DRAFT:
             product.state = models.product.STATE_ACTIVE
@@ -441,6 +516,7 @@ def products_update(
     grailed_id: int = 0,
     name: str = "",
     color: str = "",
+    link: str = "",
     material: str = "",
     model: str = "",
     season: str = "",
@@ -477,6 +553,9 @@ def products_update(
         if grailed_id:
             product.grailed_id = grailed_id
             changes_list.append("grailed id")
+
+        if link:
+            changes_list.append("link")
 
         if name:
             product.name = name

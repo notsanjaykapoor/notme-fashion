@@ -10,6 +10,7 @@ def update(
     data: dict,
     brands: list[str]=[],
     categories: list[str]=[],
+    links: list[str]=[],
     tags: list[str]=[],
 ) -> int:
     """
@@ -25,6 +26,9 @@ def update(
 
     if categories and product.categories != sorted(categories):
         product.categories = sorted(categories)
+
+    if links and product.links != sorted(links):
+        product.links = [s.strip() for s in sorted(set(product.links).union(links))]
 
     if tags and product.tags != sorted(tags):
         product.tags = sorted(tags)

@@ -43,6 +43,10 @@ class Product(sqlmodel.SQLModel, table=True):
         sa_column=sqlmodel.Column(sqlalchemy.dialects.postgresql.ARRAY(sqlmodel.String())),
     )
     key: str = sqlmodel.Field(index=True, nullable=False)
+    links: list[str] = sqlmodel.Field(
+        default=[],
+        sa_column=sqlmodel.Column(sqlalchemy.dialects.postgresql.ARRAY(sqlmodel.String())),
+    )
     name: str = sqlmodel.Field(index=False, nullable=False)
     notes: str = sqlmodel.Field(
         default="",
@@ -82,11 +86,22 @@ class Product(sqlmodel.SQLModel, table=True):
         return self.data.get("color", "")
 
     @property
+    def images_count(self) -> int:
+        return self.image_count
+
+    @property
     def grailed_url(self) -> str:
         if self.grailed_id > 0:
             return f"https://www.grailed.com/listings/{self.grailed_id}"
 
         return ""
+
+    @property
+    def links_count(self) -> int:
+        if not self.links:
+            return 0
+
+        return len(self.links)
 
     @property
     def material(self) -> str:
@@ -95,6 +110,16 @@ class Product(sqlmodel.SQLModel, table=True):
     @property
     def model(self) -> str:
         return self.data.get("model", "")
+
+    @property
+    def publishable(self) -> int:
+        if self.state != STATE_DRAFT:
+            return 0
+
+        if self.image_count == 0 or not self.name:
+            return 0
+
+        return 1
 
     @property
     def search_text(self) -> str:

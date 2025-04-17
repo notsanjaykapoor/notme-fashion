@@ -27,6 +27,7 @@ def test_products_create(db_session: sqlmodel.Session, user_1: models.User):
     assert product_1.categories == []
     assert product_1.grailed_id == 0
     assert product_1.key
+    assert product_1.links == []
     assert product_1.name == "Product 1"
     assert product_1.search_vector
     assert product_1.source_id

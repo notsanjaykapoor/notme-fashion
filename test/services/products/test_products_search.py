@@ -1,5 +1,3 @@
-import pytest
-import sqlalchemy.exc
 import sqlmodel
 import ulid
 

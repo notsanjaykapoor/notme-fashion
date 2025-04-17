@@ -1,0 +1,33 @@
+<div class="flex flex-row mt-10 mb-0">
+    <div class="w-1/12"></div>
+    <div class="w-10/12 border-b-2 border-slate-100 pb-5">
+        <p class="font-semibold text-xs text-black">
+            Product Links - {{product.links_count}}
+            <span class="font-normal float-right text-zinc-400">
+                {{product.state}}
+            </span>
+        </p>
+    </div>
+</div>
+
+{% for link in product.links or [] %}
+
+<div class="flex flex-row mt-5">
+    <div class="w-1/12"></div>
+    <div class="w-10/12 text-xs">
+        <a href="{{link}}" class="font-bold text-blue-700" target="_href">
+            {{link}}
+        </a>
+    </div>
+</div>
+
+{% endfor %}
+
+<div class="flex flex-row mt-10">
+    <div class="w-1/12"></div>
+    <div class="w-6/12 font-normal text-xs">
+        <input type="search" name="link" value="" placeholder="add link" autocomplete="off"
+            hx-get="/products/{{product.id}}/links/add" hx-target="#links-table" hx-trigger="search"
+            class="search-primary px-0 py-2.5 mx-0 h-full w-full border-b bg-transparent outline outline-0 transition-all placeholder-shown:border-blue-gray-200 focus:border-blue-300 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+    </div>
+</div>

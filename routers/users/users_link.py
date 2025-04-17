@@ -150,7 +150,7 @@ def users_verify(
             user_profile.state = models.user.STATE_VERIFIED
 
         db_session.add(user_profile)
-        db_session.commit(user_profile)
+        db_session.commit()
 
         verify_code = 0
         verify_message = ""

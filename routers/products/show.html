@@ -48,19 +48,36 @@
         </ul>
     </div>
     <div class="w-6/12 text-xs/6">
+        {% if product.links %}
+        <p>
+            Check out the following links for more product info:
+        <ul class="mt-2 mb-5">
+            {% for link in product.links %}
+            <li>
+                <a href="{{link}}" target="_blank" class="font-bold text-blue-700">
+                    {{link}}
+                </a>
+            </li>
+
+            {% endfor %}
+        </ul>
+        </p>
+        {% endif %}
+
         {% if product.grailed_url %}
         <p>
             This item is for sale on <a href="{{product.grailed_url}}" target="_blank"
                 class="text-blue-600 font-semibold">grailed</a>. &nbsp;Reach out on <a
                 href="https://www.instagram.com/swrecked" target="_blank"
-                class="text-blue-600 font-semibold">instagram</a> with any inquiries. &nbsp;Check out more items for <a
+                class="text-blue-600 font-semibold">instagram</a> with any inquiries. &nbsp;View more items for <a
                 href="/gallery?name=for+sale&query=state:sell" class="text-blue-600 font-semibold">sale</a> or just
             browse the <a href="/gallery" class="text-blue-600 font-semibold">gallery</a>.
         </p>
         {% else %}
         <p>
-            Check out items for <a href="/gallery?name=for+sale&query=state:sell"
-                class="text-blue-600 font-semibold">sale</a> or
+            View items for <a href="/gallery?name=for+sale&query=state:sell"
+                class="text-blue-600 font-semibold">sale</a>
+            or
             continue browsing the <a href="/gallery" class="text-blue-600 font-semibold">gallery</a>. &nbsp;Reach out on
             <a href="https://www.instagram.com/swrecked" target="_blank"
                 class="text-blue-600 font-semibold">instagram</a> with any inquiries.
