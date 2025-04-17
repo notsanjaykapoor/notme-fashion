@@ -76,8 +76,18 @@ def list(
         elif token["field"] in ["id", "ids"]:
             values = [int(s) for s in value.lower().split(",")]
             dataset = dataset.where(model.id.in_(values))
+        elif token["field"] in ["images"]:
+            if int(value) == 0:
+                dataset = dataset.where(model.image_count == 0)
+            else:
+                dataset = dataset.where(model.image_count >= int(value))
         elif token["field"] == "key":
             dataset = dataset.where(model.key == value)
+        elif token["field"] in ["links"]:
+            if int(value) == 0:
+                dataset = dataset.where(sqlalchemy.sql.func.cardinality(model.links) == 0)
+            else:
+                dataset = dataset.where(sqlalchemy.sql.func.cardinality(model.links) >= int(value))
         elif token["field"] == "material":
             dataset = dataset.where(model.data["material"].as_string().like("%" + value + "%"))
         elif token["field"] == "name":

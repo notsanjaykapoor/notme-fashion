@@ -12,7 +12,6 @@
             sitekey: "{{turnstile_site_key}}",
             callback: function (token) {
                 // User successfully completed the Turnstile challenge
-                console.log("cloudflare turnstile challenge success: " + token);
                 // Send the token to the server for verification
                 fetch('/turnstile/verify', {
                     method: 'POST',
