@@ -26,8 +26,7 @@
             <thead class="font-normal text-center text-xs leading-6 text-zinc-800">
                 <tr>
                     <th class="p-4">brand / name</th>
-                    <th class="p-4">categories</th>
-                    <th class="p-4">tags</th>
+                    <th class="p-4">categories / tags</th>
                     <th class="p-4">color</th>
                     <th class="p-4">season</th>
                     <th class="p-4">state</th>
@@ -40,14 +39,19 @@
                 {% for product in products_list %}
                 <tr class="group hover:bg-zinc-50 odd:bg-white even:bg-slate-50 text-center text-xs/6">
                     <td class="p-4 font-normal">
-                        {{ product.brands_string }}
+                        <a class="font-bold text-sky-400" href="/products?query=brand:{{product.brands_string}}">
+                            {{ product.brands_string }}
+                        </a>
                         <br />
                         <a class="font-bold text-blue-700" href="/products/{{product.id}}">
                             {{ product.name }}
                         </a>
                     </td>
-                    <td class="p-4 font-normal">{{ product.categories_string }}</td>
-                    <td class="p-4 font-normal">{{ product.tags_string }}</td>
+                    <td class="p-4 font-normal">
+                        {{ product.categories_string }}
+                        <br />
+                        {{ product.tags_string }}
+                    </td>
                     <td class="p-4 font-normal">{{ product.color }}</td>
                     <td class="p-4 font-normal">{{ product.season }}</td>
                     <td class="p-4 font-normal">{{ product.state }}</td>

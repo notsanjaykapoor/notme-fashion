@@ -44,7 +44,7 @@ def create(
 
     # upload image url or file
 
-    _host, _dir, path = services.files.file_uri_parse(source_uri=url)
+    path, _, _ = services.files.file_uri_parse(source_uri=url)
 
     if path:
         # read file
