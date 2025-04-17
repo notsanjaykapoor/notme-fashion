@@ -22,6 +22,7 @@ import routers.products.products_list
 import routers.products.products_manage
 import routers.products.products_show
 import routers.site.site
+import routers.turnstile.turnstile
 import routers.users.users_profile
 import routers.users.users_link
 import services.database
@@ -58,6 +59,7 @@ app.include_router(routers.products.products_list.app)
 app.include_router(routers.products.products_manage.app)
 app.include_router(routers.products.products_show.app)
 app.include_router(routers.site.site.app)
+app.include_router(routers.turnstile.turnstile.app)
 app.include_router(routers.users.users_profile.app)
 app.include_router(routers.users.users_link.app)
 
@@ -83,7 +85,7 @@ async def notme_middleware(request: fastapi.Request, call_next):
     # set request id context var
     context.rid_set(ulid.new().str)
 
-    # set user_id context var
+    # set user_id context var derviced from session_id cookie
     session_id = request.cookies.get("session_id", "")
     if jwt_user := services.users.jwt_token_decode(token=session_id):
         user_id = jwt_user.get("user_id")

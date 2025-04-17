@@ -1,5 +1,6 @@
 import datetime
 import os
+import typing
 
 import fastapi
 import fastapi.responses
@@ -36,10 +37,14 @@ def users_login(
     user_struct: UserPassStruct = None,
     db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
     user_id: int = fastapi.Depends(main_shared.get_user_id),
+    challenge_ts: typing.Annotated[str | None, fastapi.Cookie()] = "",
 ):
     """
     user login page
     """
+    if not challenge_ts:
+        return fastapi.responses.RedirectResponse("/turnstile")
+
     user_struct = user_struct or UserPassStruct(email="", password="")
     user_email = user_struct.email
     user_pass = user_struct.password

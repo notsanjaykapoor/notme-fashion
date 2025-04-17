@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col items-center mx-auto mt-20">
+    <div id="cf-turnstile"></div>
+</div>
+
+<script>
+    window.onloadTurnstileCallback = function () {
+        turnstile.render("#cf-turnstile", {
+            sitekey: "{{turnstile_site_key}}",
+            callback: function (token) {
+                // User successfully completed the Turnstile challenge
+                console.log("cloudflare turnstile challenge success: " + token);
+                // Send the token to the server for verification
+                fetch('/turnstile/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token: token })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.goto) {
+                            window.location = data.goto
+                        }
+                    });
+            },
+            async: false // Or false, depending on your needs
+        });
+    };
+</script>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback"></script>
+
+{% endblock %}

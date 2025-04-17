@@ -1,3 +1,5 @@
+import typing
+
 import fastapi
 import fastapi.responses
 import fastapi.templating
@@ -33,7 +35,11 @@ def gallery_list(
     limit: int=20,
     user_id: int = fastapi.Depends(main_shared.get_user_id),
     db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
+    challenge_ts: typing.Annotated[str | None, fastapi.Cookie()] = "",
 ):
+    if not challenge_ts:
+        return fastapi.responses.RedirectResponse("/turnstile")
+
     user = services.users.get_by_id(db_session=db_session, id=user_id)
 
     logger.info(f"{context.rid_get()} gallery query '{query}' try")
