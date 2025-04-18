@@ -108,7 +108,7 @@ def products_create(
             _code, _image = services.products.images.create(
                 db_session=db_session,
                 product=product,
-                folder="/products",
+                folder=user.ik_folder,
                 url=image_url,
             )
 
@@ -164,7 +164,7 @@ def products_images_add(
         code, _image = services.products.images.create(
             db_session=db_session,
             product=product,
-            folder="/products",
+            folder=user.ik_folder,
             url=image_url,
         )
 
@@ -454,6 +454,8 @@ def products_rembg(
     if user_id == 0:
         return fastapi.responses.RedirectResponse("/login")
 
+    user = services.users.get_by_id(db_session=db_session, id=user_id)
+
     logger.info(f"{context.rid_get()} product {product_id} image {image_id} rembg try")
 
     try:
@@ -489,7 +491,7 @@ def products_rembg(
         code, _image = services.products.images.create(
             db_session=db_session,
             product=product,
-            folder="/products",
+            folder=user.ik_folder,
             url=output_url,
         )
 

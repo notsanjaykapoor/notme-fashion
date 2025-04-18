@@ -37,16 +37,15 @@ def csv_sheet(file_id: str, file_output: str, user_email: str):
     """
     _print_status(f"file '{file_id}' download '{file_output}' try")
 
-    if not os.path.exists(file_output):
-        response = subprocess.run(
-            f"wget --output-document={file_output} https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
-            shell=True,
-            capture_output=False,
-        )
+    response = subprocess.run(
+        f"wget --output-document={file_output} https://docs.google.com/spreadsheets/d/{file_id}/export?format=csv",
+        shell=True,
+        capture_output=False,
+    )
 
-        if response.returncode != 0:
-            _print_error(f"wget error {response}")
-            exit(response.returncode)
+    if response.returncode != 0:
+        _print_error(f"wget error {response}")
+        exit(response.returncode)
 
     _print_ok(f"file download '{file_output}' completed")
 
@@ -148,7 +147,7 @@ def csv_sheet(file_id: str, file_output: str, user_email: str):
                         code, image = services.products.images.create(
                             db_session=db_session,
                             product=product,
-                            folder="/products",
+                            folder=user.ik_folder,
                             url=image_url,
                         )
 
@@ -233,7 +232,7 @@ def grailed(grailed_id: int, user_email: str):
             code, image = services.products.images.create(
                 db_session=db_session,
                 product=product,
-                folder="/products",
+                folder=user.ik_folder,
                 url=image_url,
             )
 

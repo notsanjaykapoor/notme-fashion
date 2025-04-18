@@ -47,6 +47,9 @@ class User(sqlmodel.SQLModel, table=True):
 
     @property
     def ig_key(self) -> str:
+        """
+        Instagram key used to validate profile.
+        """
         return self.data.get("ig_key", "")
 
     @property
@@ -57,7 +60,17 @@ class User(sqlmodel.SQLModel, table=True):
         return f"https://www.instagram.com/{self.ig_handle}"
 
     @property
+    def ik_folder(self) -> str:
+        """
+        Imagekit root folder for all user images.
+        """
+        return self.data.get("ik_folder", "")
+
+    @property
     def grailed_key(self) -> str:
+        """
+        Grailed key used to validate profile.
+        """
         return self.data.get("grailed_key", "")
 
     @property

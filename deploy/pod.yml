@@ -1,11 +1,9 @@
 kind: pod
-metadata: # required ?
-  name: notme-fashion
 spec:
   containers: # only 1 allowed
     - name: notme-fashion-prd
       command: make prd
-      env: .env.fashion
+      env: .env.prd.fashion
       image: docker.io/notsanjay/notme-fashion:latest
       network: notme # docker network
       ports:

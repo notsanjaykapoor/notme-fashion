@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import subprocess
 import sys
 
@@ -100,6 +101,26 @@ def migrate_up(revision: str) -> dict:
     _print_ok(f"{alembic_cmd} ok")
 
 
+@click.command()
+@click.option('--backup-file', default=None, required=True, help="backup input filename")
+@click.option('--db-uri', default=None, required=True, help="restore database uri")
+def restore(backup_file: str, db_uri: str) -> list[str]:
+
+    match = re.match(r"(postgres|postgresql):\/\/([^:]+:[^@]+)@([^:]+):(\d+)\/(.*)", db_uri)
+    _user_password, host, port, db_name = (match[2], match[3], match[4], match[5])
+
+    print(f"restore '{host}:{port}' db '{db_name}'", end=" ... ", flush=True)
+
+    if services.database.session.check(url=db_uri) != 0:
+        services.database.session.create(url=db_uri)
+
+    cmd = f"pg_restore -d {db_uri} --clean {backup_file}"
+
+    subprocess.run(cmd, shell=True)
+
+    _print_ok(f"ok")
+
+
 def _print_error(s: str):
     print("\x1b[1;31m" + s + "\x1b[0m")
 
@@ -116,6 +137,7 @@ cli.add_command(create)
 cli.add_command(migrate_init)
 cli.add_command(migrate_create)
 cli.add_command(migrate_up)
+cli.add_command(restore)
 
 if __name__ == "__main__":
     cli()
