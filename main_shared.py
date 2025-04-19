@@ -17,13 +17,14 @@ async def get_gql_context(db=fastapi.Depends(get_db)):
     return {"db": db}
 
 
-def get_user_id():
+def get_user_id() -> int:
     yield context.uid_get()
 
 
 def jinja_context(request: fastapi.Request) -> dict[str]:
     return {
+        "app_env": os.environ.get("APP_ENV", "dev"),
         "app_version": os.environ.get("APP_VERSION", ""),
         "user_id": context.uid_get(),
-        "vps_key": os.environ.get("VPS_KEY", ""),
     }
+

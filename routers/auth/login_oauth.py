@@ -19,7 +19,10 @@ import services.utils
 logger = log.init("app")
 
 # initialize templates dir
-templates = fastapi.templating.Jinja2Templates(directory="routers", context_processors=[main_shared.jinja_context])
+templates = fastapi.templating.Jinja2Templates(
+    directory="routers",
+    context_processors=[main_shared.jinja_context],
+)
 
 app = fastapi.APIRouter(
     tags=["app.oauth"],

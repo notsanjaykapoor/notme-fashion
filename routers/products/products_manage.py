@@ -509,6 +509,35 @@ def products_rembg(
     return fastapi.responses.RedirectResponse(f"/products/{product_id}/edit")
 
 
+@app.get("/products/{product_id}/sync", response_class=fastapi.responses.HTMLResponse)
+def products_sync(
+    request: fastapi.Request,
+    product_id: int,
+    user_id: int = fastapi.Depends(main_shared.get_user_id),
+    db_session: sqlmodel.Session = fastapi.Depends(main_shared.get_db),
+):
+    if user_id == 0:
+        return fastapi.responses.RedirectResponse("/login")
+
+    logger.info(f"{context.rid_get()} product {product_id} sync try")
+
+    try:
+        product = services.products.get_by_id(
+            db_session=db_session,
+            id=product_id,
+        )
+
+        services.products.sync_images(
+            db_session=db_session,
+            product=product,
+        )
+        logger.info(f"{context.rid_get()} product {product_id} sync ok")
+    except Exception as e:
+        logger.error(f"{context.rid_get()} product {product_id} sync exception '{e}'")
+
+    return fastapi.responses.RedirectResponse(f"/products/{product_id}")
+
+
 @app.get("/products/{product_id}/update", response_class=fastapi.responses.PlainTextResponse)
 def products_update(
     request: fastapi.Request,

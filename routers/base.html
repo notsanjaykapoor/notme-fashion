@@ -47,7 +47,9 @@
                 </span>
                 <a class="font-medium text-white hover:text-gray-400 mx-5" href="/logout">Logout</a>
                 {% else %}
+                {% if app_env == "dev" %}
                 <a class="font-medium text-white hover:text-gray-400 mx-5" href="/login">Login</a>
+                {% endif %}
                 {% endif %}
             </div>
         </nav>

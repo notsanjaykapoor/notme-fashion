@@ -66,13 +66,29 @@
     </div>
 </div>
 
-<div class="flex flex-row mt-10">
+<div class="flex flex-row mt-10" id="image-add-button">
+    <div class="w-1/12"></div>
+    <div class="w-10/12">
+        <a title="add product image">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                class="size-5 text-blue-700">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z"
+                    clip-rule="evenodd" />
+            </svg>
+        </a>
+    </div>
+</div>
+
+<div class="flex flex-row mt-10 hidden" id="image-add-url">
     <div class="w-1/12"></div>
     <div class="w-10/12 font-normal text-xs">
-        <input type="search" name="image_url" value="" placeholder="add image link, e.g. https://www.image.url"
-            autocomplete="off" hx-get="/products/{{product.id}}/images/add" hx-target="#images-table"
-            hx-trigger="search"
-            class="search-primary px-0 py-2.5 mx-0 h-full w-full bg-transparent outline outline-0 transition-all focus:border-b focus:border-black focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+        <input type="search" id="image-add-url-input" name="image_url" value=""
+            placeholder="add image link, e.g. https://www.image.url" autocomplete="off"
+            hx-get="/products/{{product.id}}/images/add" hx-target="#images-table" hx-trigger="search"
+            hx-on::before-send="image_add_pending()"
+            class="search-primary px-0 py-2.5 mx-0 h-full w-full bg-transparent border-b border-black outline outline-0 transition-all focus:border-b focus:border-black focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+        <span id="image-add-url-status" class="hidden">processing ...</span>
     </div>
 </div>
 
@@ -84,3 +100,17 @@
     </div>
 </div>
 {% endif %}
+
+
+<script>
+    document.getElementById("image-add-button").addEventListener("click", (event) => {
+        event.preventDefault()
+        document.getElementById("image-add-button").classList.add("hidden")
+        document.getElementById("image-add-url").classList.remove("hidden")
+    })
+
+    function image_add_pending() {
+        document.getElementById("image-add-url-input").classList.add("hidden")
+        document.getElementById("image-add-url-status").classList.remove("hidden")
+    }
+</script>
