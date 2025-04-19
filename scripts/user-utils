@@ -12,6 +12,7 @@ import click
 import models
 import services.database.session
 import services.users
+import services.users.acls
 
 
 @click.group()
@@ -22,8 +23,9 @@ def cli():
 @click.command()
 @click.option("--email", required=True, help="user email")
 @click.option("--handle", required=True, help="user handle")
-@click.option("--idp", required=True, help="idp name, e.g. google")
-def create(email: str, handle: str, idp: str) -> int:
+@click.option("--idp", default="google", required=False, help="idp name, e.g. google")
+@click.option("--superuser/--no-superuser", default=False, required=False, help="idp name, e.g. google")
+def create(email: str, handle: str, idp: str, superuser: bool) -> int:
     """
     create user
     """
@@ -34,24 +36,44 @@ def create(email: str, handle: str, idp: str) -> int:
 
         if user:
             _print_ok("exists")
-            return 0
+        else:
+            _print_status("create")
 
-        _print_status("create")
+            # create user
 
-        # create user
+            user = models.User(
+                email=email,
+                handle=handle,
+                idp=idp,
+                state=models.user.STATE_ACTIVE,
+                tz=models.user.TZ_DEFAULT,
+            )
 
-        user = models.User(
-            email=email,
-            handle=handle,
-            idp=idp,
-            state=models.user.STATE_ACTIVE,
-            tz=models.user.TZ_DEFAULT,
-        )
+            db_session.add(user)
+            db_session.commit()
 
-        db_session.add(user)
-        db_session.commit()
+            _print_ok(f"user '{email}' created")
 
-        _print_ok(f"user '{email}' created")
+        # add user default acl's
+
+        print(f"user '{email}' acl check", end=" ... ")
+
+        code, _acl = services.users.acls.create_default(db_session=db_session, user=user)
+
+        if code == 0:
+            _print_ok("ok")
+        else:
+            _print_ok("exists")
+
+        if superuser:
+            print(f"user '{email}' superuser check", end=" ... ")
+
+            code, _acl = services.users.acls.create_superuser(db_session=db_session, user=user)
+
+        if code == 0:
+            _print_ok("ok")
+        else:
+            _print_ok("exists")
 
 
 def _print_error(s: str):

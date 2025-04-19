@@ -92,6 +92,25 @@ def user_1_fixture(db_session: sqlmodel.Session):
     services.database.truncate_tables(db_session=db_session, table_names=["users"])
 
 
+@pytest.fixture(name="user_acl_1")
+def user_acl_1_fixture(db_session: sqlmodel.Session, user_1: models.User):
+    user_acl = models.UserAcl(
+        resource_name=models.user_acl.RESOURCE_USERS,
+        resource_id=user_1.id,
+        roles=models.user_acl.ROLES_ALL,
+        user_id=user_1.id
+    )
+
+    db_session.add(user_acl)
+    db_session.commit()
+
+    assert user_acl.id
+
+    yield user_acl
+
+    services.database.truncate_tables(db_session=db_session, table_names=["user_acls"])
+
+
 @pytest.fixture(name="bm_1")
 def bookmark_1_fixture(db_session: sqlmodel.Session, user_1: models.User):
     bm = models.Bookmark(

@@ -10,7 +10,7 @@ __pycache__/
 sqlite*
 
 data/
-env/
+env*
 logs/
 **/*secret*.yml
 secrets/

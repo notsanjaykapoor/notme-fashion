@@ -9,6 +9,7 @@ import main_shared
 import routers.utils
 import services.products
 import services.users
+import services.users.acls
 
 logger = log.init("app")
 
@@ -35,6 +36,10 @@ def products_list(
         return fastapi.responses.RedirectResponse("/login")
 
     user = services.users.get_by_id(db_session=db_session, id=user_id)
+
+    if services.users.acls.manage_users(db_session=db_session, user=user) != 1:
+        logger.error(f"{context.rid_get()} products query '{query}' not authorized")
+        return fastapi.responses.RedirectResponse("/gallery")
 
     logger.info(f"{context.rid_get()} products query '{query}' try")
 
