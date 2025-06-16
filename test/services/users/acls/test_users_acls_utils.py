@@ -3,7 +3,6 @@ import random
 import sqlmodel
 
 import models
-import services.database
 import services.users.acls
 
 
@@ -29,3 +28,12 @@ def test_users_acls_manage_products(db_session: sqlmodel.Session, user_1: models
 
     assert code == 1
 
+
+def test_users_acls_roles_expand():
+    assert services.users.acls.roles_expand(roles=models.user_acl.ROLES_ALL) == "mrw"
+
+    assert services.users.acls.roles_expand(roles="r") == "r"
+    assert services.users.acls.roles_expand(roles="w") == "rw"
+    assert services.users.acls.roles_expand(roles="m") == "mrw"
+    assert services.users.acls.roles_expand(roles="mr") == "mrw"
+    assert services.users.acls.roles_expand(roles="mw") == "mrw"

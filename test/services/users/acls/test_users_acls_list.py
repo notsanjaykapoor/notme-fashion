@@ -6,7 +6,7 @@ import services.users.acls
 
 
 def test_users_acls_list(db_session: sqlmodel.Session, user_1: models.User):
-    # create acl with rw role on a single user
+    # create acl with write role on a single user
 
     acl_1 = models.UserAcl(
         roles="rw",
@@ -15,7 +15,7 @@ def test_users_acls_list(db_session: sqlmodel.Session, user_1: models.User):
         user_id=user_1.id,
     )
 
-    # create acl with m role on all users
+    # create acl with manage role on all users
 
     acl_2 = models.UserAcl(
         roles="mrw",

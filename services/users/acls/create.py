@@ -4,7 +4,7 @@ import models
 import services.users.acls
 
 
-def create_default(db_session: sqlmodel.Session, user: models.User) -> tuple[int, models.User | None]:
+def create_default(db_session: sqlmodel.Session, user: models.User) -> tuple[int, models.User]:
     """
     Create default user acl, which gives users manage, read, write roles over all their resources.
     """
@@ -22,7 +22,7 @@ def create_default(db_session: sqlmodel.Session, user: models.User) -> tuple[int
         return 409, list_struct.objects[0]
     
     user_acl = models.UserAcl(
-        roles=models.user_acl.ROLES_ALL,
+        roles=services.users.acls.roles_expand(models.user_acl.ROLES_ALL),
         resource_name=name,
         resource_id=rid,
         user_id=user.id,
@@ -34,7 +34,7 @@ def create_default(db_session: sqlmodel.Session, user: models.User) -> tuple[int
     return 0, user_acl
 
 
-def create_superuser(db_session: sqlmodel.Session, user: models.User) -> tuple[int, models.User | None]:
+def create_superuser(db_session: sqlmodel.Session, user: models.User) -> tuple[int, models.User]:
     """
     Create superuser user acl, which gives users manage, read, write roles over all resources.
     """
@@ -52,7 +52,7 @@ def create_superuser(db_session: sqlmodel.Session, user: models.User) -> tuple[i
         return 409, list_struct.objects[0]
     
     user_acl = models.UserAcl(
-        roles=models.user_acl.ROLES_ALL,
+        roles=services.users.acls.roles_expand(roles=models.user_acl.ROLES_ALL),
         resource_name=name,
         resource_id=rid,
         user_id=user.id,

@@ -28,7 +28,7 @@ def manage_product(db_session: sqlmodel.Session, user: models.User, resource: mo
         )
 
         if list_struct.total > 0:
-            return list_struct.total
+            return 1
 
     return 0
 
@@ -72,13 +72,30 @@ def manage_users(db_session: sqlmodel.Session, user: models.User) -> int:
     Returns 1 if user is allowed to manage all users.
     """
     key = models.user_acl.RESOURCE_USERS
-    role = models.user_acl.ROLES_MANAGE
+    roles = models.user_acl.ROLES_MANAGE
 
     list_struct = services.users.acls.list(
         db_session=db_session,
-        query=f"name:{key} id:0 user:{user.id} role:{role}",
+        query=f"name:{key} id:0 user:{user.id} role:{roles}",
         offset=0,
         limit=1,
     )
 
     return list_struct.total
+
+
+def roles_expand(roles: str) -> str:
+    """
+    Expand roles list to be complete.
+
+    Examples:
+      - role 'w' should always include 'r'
+      - role 'm' should always include 'rw'
+    """
+    if "m" in roles:
+        return "mrw"
+    
+    if "w" in roles:
+        return "rw"
+    
+    return roles
