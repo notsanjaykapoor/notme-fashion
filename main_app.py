@@ -7,7 +7,7 @@ import fastapi
 import fastapi.middleware.cors
 import fastapi.staticfiles
 import fastapi.templating
-import sqlmodel
+import sqlmodel # noqa: F401 required for db migrate to work properly
 import starlette.middleware.sessions
 import ulid
 
@@ -25,6 +25,7 @@ import routers.site.site
 import routers.turnstile.turnstile
 import routers.users.users_profile
 import routers.users.users_link
+import sentry
 import services.database
 import services.users
 
@@ -32,16 +33,22 @@ logger = log.init("app")
 
 @contextlib.asynccontextmanager
 async def lifespan(app: fastapi.FastAPI):
-    logger.info("api.startup init")
+    logger.info("api.startup init try")
+
+    logger.info("api.startup init sentry")
+
+    sentry.init()
 
     if services.database.session.check() != 0:
         # create database
         services.database.session.create()
 
+    logger.info("api.startup init db")
+
     # migrate database
     services.database.session.migrate()
 
-    logger.info("api.startup completed")
+    logger.info("api.startup init ok")
 
     yield
 
